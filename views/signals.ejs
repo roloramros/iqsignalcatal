@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuración de Señales</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: row;
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+    }
+
+
+    .panel {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .left-panel {
+      flex: 1;
+      max-width: 400px;
+      position: sticky;
+      top: 10px;
+      margin-left: 10px;
+      /* <--- Espacio entre los paneles */
+      align-self: self-start;
+      height: fit-content;
+    }
+
+    .right-panel {
+      flex: 1 1 400px;
+      /* antes era 1 o flex: 1 1 600px; */
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section h4 {
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      margin: 4px 0;
+      cursor: pointer;
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+      margin-right: 8px;
+    }
+
+    button {
+      padding: 10px 16px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th,
+    td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #333;
+      color: white;
+    }
+
+    .cinta-informativa {
+      position: fixed;
+      bottom: 0;
+      /* Cambia a bottom: 0; si la quieres abajo */
+      left: 0;
+      width: 100%;
+      background: #333;
+      color: #fff;
+      overflow: hidden;
+      white-space: nowrap;
+      z-index: 9999;
+      height: 30px;
+      display: flex;
+      align-items: center;
+    }
+
+    .contenido-cinta {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scrollCinta 30s linear infinite;
+      font-size: 14px;
+    }
+
+    .tabla-scroll {
+      max-height: 760px;
+      /* Ajustá a lo que te convenga */
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th {
+      background-color: #333;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+
+
+
+
+    @keyframes scrollCinta {
+      0% {
+        transform: translateX(0%);
+      }
+
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background-color: #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      animation: progressAnimation 2s infinite;
+    }
+
+
+
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .right-panel {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Configuración de las Señales</h2>
+
+
+  <div class="container">
+
+
+    <!-- Panel derecho: Tabla de historial -->
+    <div class="panel right-panel">
+      <div
+        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+        <h4 style="margin: 0;">Histórico de Señales</h4>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <label for="filtro-senal"><strong>Señal:</strong></label>
+          <select id="filtro-senal" style="padding: 5px;">
+            <option value="TODAS">Todas</option>
+            <option value="pierde_100">Pierde 100%</option>
+            <option value="alcanza_100">Alcanza 100%</option>
+            <option value="2_perdidas_consecutivas">2 Pérdidas Consecutivas</option>
+            <option value="3_perdidas_consecutivas">3 Pérdidas Consecutivas</option>
+            <option value="confluencia">Confluencia</option>
+          </select>
+
+          <label for="filtro-resultado"><strong>Resultado:</strong></label>
+          <select id="filtro-resultado" style="padding: 5px;">
+            <option value="TODOS">Todos</option>
+            <option value="✅">✅</option>
+            <option value="✅¹">✅¹</option>
+            <option value="✅²">✅²</option>
+            <option value="❌">❌</option>
+            <option value="⚠️">⚠️</option>
+          </select>
+        </div>
+      </div>
+
+
+
+
+      <div class="tabla-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Par</th>
+              <th>Señal</th>
+              <th>Vela Condicional</th>
+              <th>Condición</th>
+              <th>Operación</th>
+              <th>Martin Gala</th>
+              <th>%Loss</th>
+              <th>Resultado</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-signales">
+            <!-- Aquí irán los datos cargados dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Panel izquierdo: Configuración -->
+    <div class="panel left-panel">
+      <form>
+        <div class="section panel-notificaciones">
+          <h4>Activar notificaciones:</h4>
+          <label><input type="radio" name="notificaciones" value="none" checked>Sin Notificaciones</label>
+          <label><input type="radio" name="notificaciones" value="navegador">Notificar en el Navegador</label>
+          <label><input type="radio" name="notificaciones" value="telegram">Notificar en Bot de Telegram</label>
+          <label><input type="radio" name="notificaciones" value="ambos">Ambos</label>
+        </div>
+
+        <div class="section panel-activar-senal">
+          <h4>Activar Señal:</h4>
+          <label><input type="checkbox" id="confluencia" checked>Confluencia de patrones</label>
+          <label><input type="checkbox" id="unaPerdida">Luego de perder un cuadrante</label>
+          <label><input type="checkbox" id="dosPerdidas">Luego de dos pérdidas seguidas</label>
+          <label><input type="checkbox" id="tresPerdidas">Luego de tres pérdidas seguidas</label>
+          <label><input type="checkbox" id="alPerfeccion">Luego de alcanzar la perfección</label>
+          <label><input type="checkbox" id="perderPerfeccion">Luego de perder la perfección</label>
+          <label><input type="checkbox" id="cuadranteDoji">Luego un Cuadrante con Doji</label>
+        </div>
+
+        <div class="section panel-martingala">
+          <h4>Configurar Martin Gala:</h4>
+          <label><input type="radio" name="martingala" value="nogaledirecto">Sin Martin Gala (Entrada directa)</label>
+          <label><input type="radio" name="martingala" value="nogale">Sin Martin Gala (Entrar tras 2 pérdidas)</label>
+          <label><input type="radio" name="martingala" value="gale1directo">Usar 1 Martin Gala (Entrada directa)</label>
+          <label><input type="radio" name="martingala" value="gale1trasperdida">Usar 1 Martin Gala (Entrar tras 1
+            pérdida)</label>
+          <label><input type="radio" name="martingala" value="gale2" checked>Usar 2 Martin Galas</label>
+        </div>
+        <div class="section">
+          <input type="text" id="telegramAlias" placeholder="Introduce tu alias de Telegram"
+            style="width: 100%; padding: 8px; box-sizing: border-box;">
+        </div>
+
+        <div class="section">
+          <button type="button" id="guardarConfiguracion">Guardar Configuración</button>
+        </div>
+        <div class="section">
+          <button type="button" id="generarResultados">Generar Resultados</button>
+        </div>
+        <div class="section" id="barra-progreso-container" style="display: none;">
+          <div class="progress-bar">
+            <div class="progress-fill" id="barra-fill"></div>
+          </div>
+          <p id="progreso-texto" style="font-size: 14px; text-align: center;">Procesando...</p>
+        </div>
+
+        <div class="section">
+          <button type="button" id="borrarRegistros" style="background-color: #dc3545;">Borrar Registros</button>
+        </div>
+      </form>
+
+    </div>
+
+
+    <div class="cinta-informativa">
+      <div class="contenido-cinta" id="contenido-cinta">
+        🔥 Bienvenido a tu panel de señales, aquí encontrarás un registro de todas las señales que has generado con el
+        catalogador | 📢 Recuerda configurar tus notificaciones
+        y gaurdar los cambios realizados | 🚀 Nuevas funciones funciones en desarrollo disponibles proximamente
+      </div>
+    </div>
+
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/dist/umd/supabase.min.js"></script>
+
+  <script>
+
+    const clientesupabase = supabase.createClient(
+      'https://lmhyfgagksvojfkbnygx.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtaHlmZ2Fna3N2b2pma2JueWd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MjA4MzksImV4cCI6MjA2NTk5NjgzOX0.bD-j6tXajDumkB7cuck_9aNMGkrAdnAJLzQACoRYaJo'
+    );
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const userId = "<%= user.id %>";
+
+      try {
+        const { data, error } = await clientesupabase
+          .from("user_config")
+          .select("licencia")
+          .eq("user_id", userId)
+          .single();
+
+        if (error) throw error;
+        const licencia = data?.licencia || "free";
+
+        const panelNotificaciones = document.querySelector(".panel-notificaciones");
+        if (licencia === "free" && panelNotificaciones) {
+          // Deshabilitar todos los inputs dentro del panel
+          const inputs = panelNotificaciones.querySelectorAll("input");
+          inputs.forEach(input => input.disabled = true);
+
+          // Añadir una capa visual de bloqueo
+          panelNotificaciones.classList.add("bloqueado");
+
+          // Tooltip / mensaje
+          const aviso = document.createElement("div");
+          aviso.className = "mensaje-bloqueo";
+          aviso.innerHTML = "🔒 Disponible solo para suscriptores PRO o PREMIUM";
+          panelNotificaciones.appendChild(aviso);
+        }
+
+        const panelsignal = document.querySelector(".panel-activar-senal");
+        if (!panelsignal) return;
+        // Si es free: deshabilitamos TODO menos el primer y último checkbox
+        if (licencia === "free") {
+          const checks = panelsignal.querySelectorAll('input[type="checkbox"]');
+          checks.forEach(cb => {
+            const iselement1 = cb.id === "confluencia";
+            const iselement2 = cb.id === "cuadranteDoji";
+            const iselement3 = cb.id === "tresPerdidas";
+            if (!iselement1 && !iselement2 && !iselement3) {
+              cb.disabled = true;
+
+              // Tooltip en el label
+              const label = cb.closest("label");
+              if (label) {
+                label.classList.add("disabled-control");
+                label.setAttribute("title", "🔒 Disponible con PRO o PREMIUM");
+                label.setAttribute("data-bs-toggle", "tooltip");
+                label.setAttribute("data-bs-placement", "right");
+              }
+            }
+          });
+          if (window.bootstrap?.Tooltip) {
+            document
+              .querySelectorAll('.panel-activar-senal [data-bs-toggle="tooltip"]')
+              .forEach(el => bootstrap.Tooltip.getOrCreateInstance(el, {
+                container: "body",
+                placement: "right",
+                trigger: "hover focus"
+              }));
+          }
+        }
+
+
+
+
+        const allowedForFree = new Set(["nogaledirecto", "gale2"]);
+        const panel = document.querySelector(".panel-martingala");
+        if (!panel) return;
+
+
+        if (licencia === "free") {
+          const radios = panel.querySelectorAll('input[type="radio"][name="martingala"]');
+
+          // Deshabilitar las no permitidas y añadir tooltip visual al label
+          radios.forEach(r => {
+            if (!allowedForFree.has(r.value)) {
+              r.disabled = true;
+              const label = r.closest("label");
+              if (label) {
+                label.classList.add("disabled-control");
+                label.setAttribute("title", "🔒 Disponible con PRO o PREMIUM");
+                label.setAttribute("data-bs-toggle", "tooltip");
+                label.setAttribute("data-bs-placement", "right");
+              }
+            }
+          });
+
+          // Inicializar tooltips de Bootstrap (si viene del layout)
+          if (window.bootstrap?.Tooltip) {
+            panel.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el =>
+              bootstrap.Tooltip.getOrCreateInstance(el, {
+                container: "body",
+                placement: "right",
+                trigger: "hover focus"
+              })
+            );
+          }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      } catch (err) {
+        console.error("Error verificando licencia:", err);
+      }
+    });
+  </script>
+
+  <style>
+    .bloqueado {
+      opacity: 0.5;
+      position: relative;
+      pointer-events: none;
+    }
+
+    .mensaje-bloqueo {
+      position: absolute;
+      top: 40%;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      padding: 8px;
+      font-size: 14px;
+      border-radius: 6px;
+      pointer-events: all;
+    }
+
+    .disabled-control {
+      opacity: 0.6;
+      cursor: not-allowed !important;
+    }
+  </style>
+
+
+
+  <script>
+    // Al cargar la página
+    async function cargarConfiguracion() {
+      let userId = null;
+      userId = "<%= user.id %>";
+      try {
+        // Cargar configuración principal
+        const { data: config, error: configError } = await clientesupabase
+          .from('configuracion_senal_usuario')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (configError) throw configError;
+
+        // Cargar alias de Telegram
+        const { data: telegramData, error: telegramError } = await clientesupabase
+          .from('user_config')
+          .select('telegram_alias')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (telegramError) throw telegramError;
+
+        if (config) {
+          // Establecer los valores en los controles del formulario
+          document.querySelector(`input[name="notificaciones"][value="${config.notificacion}"]`).checked = true;
+          document.querySelector(`input[name="martingala"][value="${config.martin_gala}"]`).checked = true;
+          document.getElementById("confluencia").checked = config.confluencia;
+          document.getElementById("unaPerdida").checked = config.perdidas_1;
+          document.getElementById("dosPerdidas").checked = config.perdidas_2;
+          document.getElementById("tresPerdidas").checked = config.perdidas_3;
+          document.getElementById("alPerfeccion").checked = config.alcanza_100;
+          document.getElementById("perderPerfeccion").checked = config.pierde_100;
+          document.getElementById("cuadranteDoji").checked = config.cuadrante_doji;
+        }
+        // Establecer el alias de Telegram si existe
+        document.getElementById("telegramAlias").value = telegramData?.telegram_alias || "";
+      } catch (error) {
+        console.error("Error al cargar configuración:", error.message);
+      }
+    }
+
+
+    // Llamar al cargar la página
+    document.addEventListener('DOMContentLoaded', cargarConfiguracion);
+
+
+    document.getElementById("guardarConfiguracion").addEventListener("click", async () => {
+      const userId = "<%= user.id %>";
+      const telegramAlias = document.getElementById("telegramAlias").value.trim();
+
+      try {
+        // Primero guardamos la configuración principal
+        const config = {
+          user_id: userId,
+          notificacion: document.querySelector('input[name="notificaciones"]:checked')?.value,
+          martin_gala: document.querySelector('input[name="martingala"]:checked')?.value,
+          confluencia: document.getElementById("confluencia").checked,
+          perdidas_1: document.getElementById("unaPerdida").checked,
+          perdidas_2: document.getElementById("dosPerdidas").checked,
+          perdidas_3: document.getElementById("tresPerdidas").checked,
+          alcanza_100: document.getElementById("alPerfeccion").checked,
+          pierde_100: document.getElementById("perderPerfeccion").checked,
+          cuadrante_doji: document.getElementById("cuadranteDoji").checked,
+        };
+
+        // Verificamos si existe configuración para este usuario
+        const { data: existingConfig, error: fetchError } = await clientesupabase
+          .from('configuracion_senal_usuario')
+          .select('user_id')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (fetchError) throw fetchError;
+
+        if (existingConfig) {
+          // Actualizar configuración existente
+          const { error: updateError } = await clientesupabase
+            .from('configuracion_senal_usuario')
+            .update(config)
+            .eq('user_id', userId);
+
+          if (updateError) throw updateError;
+        } else {
+          // Insertar nueva configuración
+          const { error: insertError } = await clientesupabase
+            .from('configuracion_senal_usuario')
+            .insert([config]);
+
+          if (insertError) throw insertError;
+        }
+
+        // Ahora manejamos el alias de Telegram
+        if (telegramAlias) {
+          // Verificamos si ya existe un registro para este usuario
+          const { data: existingTelegram, error: telegramFetchError } = await clientesupabase
+            .from('user_config')
+            .select('user_id')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+          if (telegramFetchError) throw telegramFetchError;
+
+          if (existingTelegram) {
+            // Actualizar alias existente
+            const { error: telegramUpdateError } = await clientesupabase
+              .from('user_config')
+              .update({ telegram_alias: telegramAlias })
+              .eq('user_id', userId);
+
+            if (telegramUpdateError) throw telegramUpdateError;
+          } else {
+            // Insertar nuevo alias
+            const { error: telegramInsertError } = await clientesupabase
+              .from('user_config')
+              .insert([{ user_id: userId, telegram_alias: telegramAlias }]);
+
+            if (telegramInsertError) throw telegramInsertError;
+          }
+        }
+
+        alert("✅ Configuración guardada correctamente.");
+      } catch (error) {
+        console.error("Error al guardar configuración:", error.message);
+        alert("❌ Error al guardar la configuración: " + error.message);
+      }
+    });
+  </script>
+
+  <script>
+
+    async function cargarAlertas() {
+      const userId = "<%= user.id %>";
+
+      try {
+        const { data, error } = await clientesupabase
+          .from("registro_alertas")
+          .select("*")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        const tabla = document.getElementById("tabla-signales");
+        tabla.innerHTML = ""; // limpiar antes de cargar
+
+        if (data.length === 0) {
+          tabla.innerHTML = "<tr><td colspan='8'>Sin registros aún</td></tr>";
+          return;
+        }
+
+        data.forEach(alerta => {
+          let tipoSenal = "";
+
+          const texto = alerta.señal?.toLowerCase() || "";
+
+          if (texto.includes("pierde 100")) tipoSenal = "pierde_100";
+          else if (texto.includes("alcanza 100")) tipoSenal = "alcanza_100";
+          else if (texto.includes("2 pérdidas")) tipoSenal = "2_perdidas_consecutivas";
+          else if (texto.includes("3 pérdidas")) tipoSenal = "3_perdidas_consecutivas";
+          else if (texto.includes("confluencia")) tipoSenal = "confluencia";
+          else tipoSenal = "otro";
+
+
+          const fila = document.createElement("tr");
+          fila.setAttribute("data-senal", tipoSenal);
+          fila.setAttribute("data-resultado", alerta.resultado || "");
+          fila.innerHTML = `
+  <td>${alerta.par || ''}</td>
+  <td>${alerta.señal || ''}</td>
+  <td>${alerta.vela_condicional || ''}</td>
+  <td>${alerta.condicion || ''}</td>
+  <td>${alerta.operacion || ''}</td>
+  <td>${alerta.martingala ?? ''}</td>
+  <td>${alerta.loss ?? ''}</td>
+  <td>${alerta.resultado || ''}</td>
+`;
+          tabla.appendChild(fila);
+
+        });
+
+      } catch (error) {
+        console.error("❌ Error al cargar alertas:", error.message);
+      }
+    }
+
+    // Llamamos automáticamente al cargar la página
+    document.addEventListener('DOMContentLoaded', cargarAlertas);
+
+    document.getElementById("borrarRegistros").addEventListener("click", async () => {
+      const confirmacion = confirm("¿Estás seguro de que deseas borrar todos los registros? Esta acción no se puede deshacer.");
+      if (!confirmacion) return;
+
+      const userId = "<%= user.id %>";
+
+      try {
+        const { error } = await clientesupabase
+          .from("registro_alertas")
+          .delete()
+          .eq("user_id", userId);
+
+        if (error) throw error;
+
+        alert("✅ Registros eliminados correctamente.");
+        cargarAlertas(); // Vuelve a cargar la tabla limpia
+      } catch (error) {
+        console.error("❌ Error al borrar registros:", error.message);
+        alert("❌ Error al borrar registros: " + error.message);
+      }
+    });
+
+    // Generar resultados
+    document.getElementById("generarResultados").addEventListener("click", async () => {
+      const userId = "<%= user.id %>";
+
+      const resumen = {
+        "✅": 0,
+        "✅¹": 0,
+        "✅²": 0,
+        "❌": 0,
+        "⚠️": 0
+      };
+
+      // Mostrar la barra de progreso
+      const barraContainer = document.getElementById("barra-progreso-container");
+      const barraFill = document.getElementById("barra-fill");
+      const textoProgreso = document.getElementById("progreso-texto");
+      barraContainer.style.display = "block";
+      barraFill.style.width = "0%";
+      textoProgreso.textContent = "Procesando...";
+
+      try {
+        const { data: alertas, error } = await clientesupabase
+          .from("registro_alertas")
+          .select("*")
+          .eq("user_id", userId)
+          .or("resultado.is.null,resultado.eq.");
+
+        if (error) throw error;
+
+        const total = alertas.length;
+        let procesadas = 0;
+
+        for (const alerta of alertas) {
+          //Para analizar Patron Impar tengo que leer 5 velas en vez de 3
+          let cantVelasSgtes = 3;
+          if (alerta.señal.includes("Impar")) {
+            cantVelasSgtes = 5;
+          }
+
+          const tablaPar = alerta.par.toLowerCase().replace("/", "").replace(" ", "_");
+          const horaCondicional = alerta.vela_condicional + ":00";
+          const operacionEsperada = alerta.operacion.includes("CALL") ? "green" : "red";
+          const { data: velaCond, error: errorCond } = await clientesupabase
+            .from(tablaPar)
+            .select("*")
+            .eq("start_time", horaCondicional)
+            .maybeSingle();
+
+          if (errorCond || !velaCond) {
+            continue;
+          }
+
+          console.log(velaCond)
+
+          const colorCondicional = velaCond.candle_color;
+          let condicionCumplida = false;
+          if (alerta.condicion === "Alcista" && colorCondicional === "green") condicionCumplida = true;
+          else if (alerta.condicion === "Bajista" && colorCondicional === "red") condicionCumplida = true;
+          else if (alerta.condicion === "Alc/Baj" && colorCondicional !== "doji") condicionCumplida = true;
+
+          if (!condicionCumplida) {
+            await clientesupabase
+              .from("registro_alertas")
+              .update({ resultado: "⚠️" })
+              .eq("id", alerta.id);
+            resumen["⚠️"]++;
+          } else {
+            const { data: velasSiguientes, error: errSig } = await clientesupabase
+              .from(tablaPar)
+              .select("*")
+              .gt("start_time", horaCondicional)
+              .order("start_time", { ascending: true })
+              .limit(cantVelasSgtes);
+
+            console.log(velasSiguientes);
+
+            if (errSig || !velasSiguientes) continue;
+
+
+
+            // ✅ Validación: si no hay 3 o 5 velas posteriores, mostramos alerta y saltamos esta señal
+            if (velasSiguientes.length < cantVelasSgtes) {
+              continue;
+            }
+
+            let maxIntentos = 1;
+            if (alerta.martingala === 1) maxIntentos = 2;
+            else if (alerta.martingala === 2) maxIntentos = 3;
+            const esPatronImpar = alerta.señal.includes("Impar");
+
+            let resultadoFinal = "❌";
+
+            for (let i = 0; i < maxIntentos; i++) {
+              const indice = esPatronImpar ? i * 2 : i; // saltar velas si es alterno
+              const vela = velasSiguientes[indice];
+
+              if (vela && vela.candle_color === operacionEsperada) {
+                resultadoFinal = i === 0 ? "✅" : i === 1 ? "✅¹" : "✅²";
+                break;
+              }
+            }
+
+            await clientesupabase
+              .from("registro_alertas")
+              .update({ resultado: resultadoFinal })
+              .eq("id", alerta.id);
+
+            resumen[resultadoFinal]++;
+          }
+
+          // Actualizar barra de progreso
+          procesadas++;
+          const porcentaje = Math.round((procesadas / total) * 100);
+          barraFill.style.width = porcentaje + "%";
+          textoProgreso.textContent = `Procesando ${procesadas} de ${total}... (${porcentaje}%)`;
+        }
+
+        let mensajeResumen = `📊 Resumen de operaciones:
+✅  Ganado directo: ${resumen["✅"]}
+✅¹ Ganado primer martingala: ${resumen["✅¹"]}
+✅² Ganado segundo martingala: ${resumen["✅²"]}
+❌  Perdido: ${resumen["❌"]}
+⚠️  Condición no cumplida: ${resumen["⚠️"]}`;
+
+        alert(mensajeResumen);
+        cargarAlertas();
+
+      } catch (error) {
+        console.error("❌ Error al generar resultados:", error.message);
+        alert("❌ Error al generar resultados: " + error.message);
+      } finally {
+        barraContainer.style.display = "none";
+      }
+    });
+
+    function aplicarFiltros() {
+      const filtroSenal = document.getElementById("filtro-senal").value;
+      const filtroResultado = document.getElementById("filtro-resultado").value;
+
+      const filas = document.querySelectorAll("#tabla-signales tr");
+
+      filas.forEach(fila => {
+        const tipoSenal = fila.getAttribute("data-senal");
+        const resultado = fila.getAttribute("data-resultado");
+
+        const cumpleSenal = filtroSenal === "TODAS" || tipoSenal === filtroSenal;
+        const cumpleResultado = filtroResultado === "TODOS" || resultado === filtroResultado;
+
+        fila.style.display = (cumpleSenal && cumpleResultado) ? "" : "none";
+      });
+    }
+
+    document.getElementById("filtro-senal").addEventListener("change", aplicarFiltros);
+    document.getElementById("filtro-resultado").addEventListener("change", aplicarFiltros);
+
+
+
+
+
+  </script>
+
+
+
+
+</body>
+
+</html>

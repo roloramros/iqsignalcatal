@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Suscripción • iqSignalCatal</title>
+  <style>
+    :root {
+      --bg: #0e0f12;
+      /* fondo general (oscuro elegante) */
+      --card: #17191f;
+      /* tarjetas */
+      --muted: #9ba3af;
+      /* texto secundario */
+      --text: #e9eef5;
+      /* texto principal */
+      --green: #17c964;
+      /* verde principal */
+      --green-700: #0ea958;
+      --red: #ff3b3b;
+      /* rojo principal */
+      --red-700: #e22f2f;
+      --ring: rgba(255, 255, 255, .08);
+      /* bordes suaves */
+      --accent: linear-gradient(135deg, rgba(23, 201, 100, .15), rgba(255, 59, 59, .15));
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 800px at 15% 0%, rgba(23, 201, 100, .08), transparent 60%),
+        radial-gradient(1200px 800px at 85% 10%, rgba(255, 59, 59, .08), transparent 60%),
+        var(--bg);
+      color: var(--text);
+      font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .wrap {
+      width: min(1200px, 92vw);
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(to bottom, rgba(14, 15, 18, .85), rgba(14, 15, 18, .55));
+      border-bottom: 1px solid var(--ring);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: .3px
+    }
+
+    .logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      color: white;
+      background: linear-gradient(135deg, var(--green), var(--red));
+      box-shadow: 0 10px 30px rgba(23, 201, 100, .25), 0 10px 30px rgba(255, 59, 59, .15);
+      font-weight: 900;
+    }
+
+    .usdt-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border: 1px dashed rgba(255, 255, 255, .16);
+      border-radius: 999px;
+      color: var(--muted)
+    }
+
+    .pill {
+      font-weight: 600;
+      color: #dfe8f5
+    }
+
+    .usdt-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--green)
+    }
+
+    /* Hero */
+    .hero {
+      padding: 38px 0 20px
+    }
+
+    .title {
+      font-size: clamp(24px, 2.8vw, 36px);
+      margin: 0 0 8px
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin: 0
+    }
+
+    /* Toggle (visual) */
+    .toggle {
+      margin: 22px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .switch {
+      position: relative;
+      width: 64px;
+      height: 34px
+    }
+
+    .switch input {
+      appearance: none;
+      width: 100%;
+      height: 100%;
+      margin: 0
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #101216;
+      border: 1px solid var(--ring);
+      border-radius: 999px;
+      transition: .25s
+    }
+
+    .slider::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 6px;
+      translate: 0 -50%;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--green), var(--red));
+      box-shadow: 0 8px 18px rgba(23, 201, 100, .25);
+      transition: .25s
+    }
+
+    .switch input:checked+.slider {
+      background: #12151b
+    }
+
+    .switch input:checked+.slider::after {
+      left: 36px;
+      box-shadow: 0 8px 18px rgba(255, 59, 59, .25)
+    }
+
+    .toggle small {
+      color: var(--muted)
+    }
+
+    /* Grid pricing */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin: 26px 0 18px
+    }
+
+    @media (max-width:960px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      position: relative;
+      border: 1px solid var(--ring);
+      background: linear-gradient(180deg, rgba(255, 255, 255, .02), transparent 40%), var(--card);
+      border-radius: 16px;
+      overflow: hidden;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      isolation: isolate;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: auto -40% 0 -40%;
+      height: 60%;
+      background: var(--accent);
+      filter: blur(20px);
+      opacity: .25;
+      pointer-events: none;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, .35);
+      border-color: rgba(255, 255, 255, .18)
+    }
+
+    .tag {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      letter-spacing: .3px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--ring);
+      color: var(--muted)
+    }
+
+    .tag .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%
+    }
+
+    .dot.green {
+      background: var(--green)
+    }
+
+    .dot.red {
+      background: var(--red)
+    }
+
+    .plan {
+      display: flex;
+      align-items: baseline;
+      gap: 10px
+    }
+
+    .plan h3 {
+      margin: 0;
+      font-size: clamp(18px, 2.2vw, 24px)
+    }
+
+    .price {
+      font-size: clamp(26px, 3.2vw, 40px);
+      font-weight: 800;
+      letter-spacing: .3px
+    }
+
+    .per {
+      color: var(--muted)
+    }
+
+    .features {
+      display: grid;
+      gap: 10px;
+      margin: 6px 0
+    }
+
+    .fi {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      color: #e7f6ee
+    }
+
+    .fi.muted {
+      color: #f6e8e8
+    }
+
+    .fi svg {
+      flex: 0 0 18px
+    }
+
+    .cta {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      transition: .18s ease transform, background .18s ease, border-color .18s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green), var(--red));
+      color: #091013;
+      box-shadow: 0 8px 28px rgba(23, 201, 100, .25), 0 8px 28px rgba(255, 59, 59, .2)
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px)
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--ring)
+    }
+
+    .helper {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center
+    }
+
+    /* Ribbon for popular plan */
+    .ribbon {
+      position: absolute;
+      right: -52px;
+      top: 14px;
+      rotate: 35deg;
+      background: linear-gradient(135deg, var(--green-700), var(--red-700));
+      color: #07120c;
+      font-weight: 800;
+      letter-spacing: .4px;
+      padding: 8px 64px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      text-transform: uppercase;
+      font-size: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    }
+
+    /* Extras */
+    .trust {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 26px 0 50px
+    }
+
+    @media (max-width:720px) {
+      .trust {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .trust .item {
+      border: 1px solid var(--ring);
+      background: var(--card);
+      padding: 14px 16px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .trust .item strong {
+      display: block
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 13px
+    }
+
+    .faq {
+      margin: 18px 0 50px;
+      display: grid;
+      gap: 12px
+    }
+
+    details {
+      border: 1px solid var(--ring);
+      background: var(--card);
+      border-radius: 14px;
+      padding: 14px 16px
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 700
+    }
+
+    details p {
+      color: var(--muted);
+      margin: 8px 0 0
+    }
+
+    /* Tiny badges */
+    .badge {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--ring);
+      color: var(--muted);
+      font-size: 12px
+    }
+
+
+    /* Mejor en fondo oscuro */
+    .neon-elite {
+      font-weight: 800;
+      color: #35ff6b;
+      /* verde inicial */
+      text-shadow:
+        0 0 6px #35ff6b,
+        0 0 12px #35ff6b,
+        0 0 24px #35ff6b,
+        0 0 48px rgba(53, 255, 107, .6);
+      animation: neonShift 2.6s ease-in-out infinite alternate;
+    }
+
+    /* Oscila entre verde y rojo con brillo */
+    @keyframes neonShift {
+      0% {
+        color: #35ff6b;
+        text-shadow:
+          0 0 6px #35ff6b,
+          0 0 12px #35ff6b,
+          0 0 24px #35ff6b,
+          0 0 48px rgba(53, 255, 107, .6);
+      }
+
+      100% {
+        color: #ff3b3b;
+        text-shadow:
+          0 0 6px #ff3b3b,
+          0 0 12px #ff3b3b,
+          0 0 24px #ff3b3b,
+          0 0 48px rgba(255, 59, 59, .6);
+      }
+    }
+
+    /* Respeto a usuarios con reducción de movimiento */
+    @media (prefers-reduced-motion: reduce) {
+      .neon-elite {
+        animation: none;
+      }
+    }
+
+    .neon-pro {
+      font-weight: 800;
+      color: #ff3b3b;
+      /* rojo base */
+      text-shadow:
+        0 0 6px #ff3b3b,
+        0 0 12px #ff3b3b,
+        0 0 24px #ff3b3b,
+        0 0 48px rgba(255, 59, 59, .6);
+      animation:
+        neonPulseRed 2.2s ease-in-out infinite alternate,
+        neonFlicker 7s linear infinite;
+      /* opcional: parpadeo leve */
+    }
+
+    /* “Pulso” solo en rojos (de rojo claro a rojo intenso) */
+    @keyframes neonPulseRed {
+      0% {
+        color: #ff6b6b;
+        text-shadow:
+          0 0 6px #ff6b6b,
+          0 0 14px #ff6b6b,
+          0 0 28px #ff6b6b,
+          0 0 56px rgba(255, 107, 107, .65);
+      }
+
+      100% {
+        color: #ff1f1f;
+        text-shadow:
+          0 0 6px #ff1f1f,
+          0 0 16px #ff1f1f,
+          0 0 32px #ff1f1f,
+          0 0 64px rgba(255, 31, 31, .75);
+      }
+    }
+
+    .neon-premium {
+      font-weight: 800;
+      color: #35ff6b;
+      /* verde base */
+      text-shadow:
+        0 0 6px #35ff6b,
+        0 0 12px #35ff6b,
+        0 0 24px #35ff6b,
+        0 0 48px rgba(53, 255, 107, .6);
+      animation:
+        neonPulseGreen 2.2s ease-in-out infinite alternate,
+        neonFlicker 7s linear infinite;
+      /* opcional */
+    }
+
+    /* Pulso solo en verdes: de verde claro a verde intenso */
+    @keyframes neonPulseGreen {
+      0% {
+        color: #66ff97;
+        text-shadow:
+          0 0 6px #66ff97,
+          0 0 14px #66ff97,
+          0 0 28px #66ff97,
+          0 0 56px rgba(102, 255, 151, .65);
+      }
+
+      100% {
+        color: #12e054;
+        text-shadow:
+          0 0 6px #12e054,
+          0 0 16px #12e054,
+          0 0 32px #12e054,
+          0 0 64px rgba(18, 224, 84, .75);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="wrap topbar">
+      <div class="brand">
+        <div class="logo">i</div>
+        <div>
+          <div class="pill">iqSignalCatal</div>
+          <small class="muted">Suscripciones</small>
+        </div>
+      </div>
+      <div class="usdt-badge" title="Por ahora aceptamos solo USDT">
+        <span class="usdt-dot"></span>
+        <span>Pago disponible: <strong>USDT</strong></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+
+
+    <!-- Pricing grid -->
+    <section class="grid" aria-label="Planes">
+
+      <% if (false) { %>
+        <!-- FREE -->
+        <article class="card" aria-label="Plan Free">
+          <span class="tag"><span class="dot green"></span> Empezá gratis</span>
+          <div class="plan">
+            <h3>Free</h3>
+          </div>
+          <div class="price">0 USDT</div>
+          <div class="per">Para explorar y probar</div>
+
+          <div class="features">
+            <div class="fi">"+check()+" Panel de Catalogación (Par: EUR/USD)</div>
+            <div class="fi">"+check()+" Notificaciones en el Navegador</div>
+            <div class="fi">"+check()+" Configuración limitada de las Señales</div>
+
+
+            <div class="fi muted">"+cross()+" Notificaciones en Telegram</div>
+            <div class="fi muted">"+cross()+" Scripts para Detección de Patrones</div>
+          </div>
+
+          <div class="cta">
+            <a class="btn btn-outline" href="/catalogacion/eurusd_otc" aria-disabled="true">Empezar</a>
+            <div class="helper">No se requieren datos de pago</div>
+          </div>
+        </article>
+        <% } %>
+          <!-- PRO (popular) -->
+          <article class="card" aria-label="Plan Pro">
+            <div class="ribbon">Más popular</div>
+            <span class="tag"><span class="dot red"></span> Mejor relación</span>
+            <div class="plan">
+              <h3 class="neon-pro">Pro</h3>
+            </div>
+            <div class="price">5 USDT<span class="per">/mes</span></div>
+            <div class="per">Para operar a diario</div>
+
+            <div class="features">
+              <div class="fi">"+check()+" Acceso Completo al Panel de Catalogación</div>
+              <div class="fi">"+check()+" Acceso Completo a la Catalogación Manual</div>
+              <div class="fi">"+check()+" Notificaciones (Navegador y Telegram)</div>
+              <div class="fi">"+check()+" Configuración total de las Señales</div>
+              <div class="fi">"+check()+" Panel de Backtesting (Par: EUR/USD)</div>
+              <div class="fi">"+check()+" Panel de Escáner de patrones (Par: EUR/USD)</div>
+
+              <div class="fi">"+check()+" Script para Detección de Patrones (1 Patrón)</div>
+
+              <div class="fi muted">"+cross()+" Bots para Operaciones Automáticas</div>
+            </div>
+
+            <div class="cta">
+              <a class="btn btn-primary" href="#" aria-disabled="true">Elegir Pro</a>
+              <div class="helper">Pago disponible en USDT</div>
+            </div>
+          </article>
+
+          <!-- PREMIUM -->
+          <article class="card" aria-label="Plan Premium">
+            <span class="tag"><span class="dot green"></span> Para exigentes</span>
+            <div class="plan">
+              <h3 class="neon-premium">Premium</h3>
+            </div>
+            <div class="price">10 USDT<span class="per">/mes</span></div>
+            <div class="per">Máxima potencia operativa</div>
+
+            <div class="features">
+              <div class="fi">"+check()+" Acceso Completo al Panel de Backtesting</div>
+              <div class="fi">"+check()+" Acceso Completo al Panel de Escáner de patrones</div>
+              <div class="fi">"+check()+" Script para Detección de Patrones (3 Patrones)</div>
+              <div class="fi">"+check()+" Bots para Operaciones Automáticas</div>
+            </div>
+
+            <div class="cta">
+              <a class="btn btn-outline" href="#" aria-disabled="true">Elegir Premium</a>
+              <div class="helper">Pago disponible en USDT</div>
+            </div>
+          </article>
+
+          <!-- ELITE -->
+          <article class="card" aria-label="Plan Elite">
+            <span class="tag"><span class="dot red"></span> Nivel superior</span>
+            <div class="plan">
+              <h3 class="neon-elite">Elite</h3>
+            </div>
+            <div class="price">20 USDT<span class="per">/mes</span></div>
+            <div class="per">Opera sin miedo pero sin pérdidas</div>
+
+            <div class="features">
+              <div class="fi">"+check()+" Todo lo Anterior</div>
+              <div class="fi">"+check()+" Acceso al Bot iqSignalCatal® (Patrón+Masaniello)</div>
+              <div class="fi">"+check()+" ... y ya solo eso 😉</div>
+            </div>
+
+            <div class="cta">
+              <a class="btn btn-primary" href="#" aria-disabled="true">Elegir Elite</a>
+              <div class="helper">Pago disponible en USDT</div>
+            </div>
+          </article>
+
+    </section>
+
+
+    <!-- Nota USDT + place para QR visual (no funcional) -->
+    <section>
+      <div class="badge" title="Ejemplo visual, sin funcionalidad">Red de pago: <strong>USDT
+          (TRC20/BEP20/ERC20)</strong></div>
+    </section>
+
+    <!-- FAQs -->
+    <section class="faq" aria-label="Preguntas frecuentes">
+      <details>
+        <summary>¿Hay algun plan free para el uso de la Web?</summary>
+        <p>Sí. Una vez hecho el registro dispone de 10 dias (Modo Demo) con todas las funcionalides activas de la
+          pagina, exceptuando la descarga de los Bots Automaticos.
+          Una vez conluido ese periodo, pasa a tener una licencia Free con las que dispondra de manera ilimitada:
+          Panel de Catalogación (Par: EUR/USD)
+          Notificaciones en el Navegador
+          Configuración limitada de las Señales
+        </p>
+      </details>
+      <details>
+        <summary>¿Puedo cambiar de plan más adelante?</summary>
+        <p>Sí. Puede cambiar el plan en cualquier momento. En caso tal que tenga una suscripción activa en el momento
+          del pago, se le sumarán los días restantes de la suscripción en curso
+          y continuará trabajando con las prestaciones de la nueva suscripción.
+        </p>
+      </details>
+      <details>
+        <summary>¿Los precios están en dólares?</summary>
+        <p>Se muestran en <strong>USDT</strong> para alinear con el método de pago.</p>
+      </details>
+      <details>
+        <summary>¿Qué incluye el plan Free?</summary>
+        <p>Acceso limitado a señales públicas y al panel básico para evaluar la plataforma.</p>
+      </details>
+    </section>
+  </main>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/dist/umd/supabase.min.js"></script>
+
+  <script>
+    const clientesupabase = supabase.createClient(
+      'https://lmhyfgagksvojfkbnygx.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtaHlmZ2Fna3N2b2pma2JueWd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MjA4MzksImV4cCI6MjA2NTk5NjgzOX0.bD-j6tXajDumkB7cuck_9aNMGkrAdnAJLzQACoRYaJo'
+    );
+  </script>
+
+  <script>
+    /* --- Iconos inline como funciones (solo visual) --- */
+    function svg(path) { return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="${path}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` }
+    function check() { return svg("M20 6L9 17l-5-5") }
+    function cross() { return svg("M18 6 6 18M6 6l12 12") }
+    function shield() { return svg("M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10") }
+    function zap() { return svg("M13 2L3 14h7l-1 8 11-12h-7l1-8z") }
+    function chat() { return svg("M21 15a4 4 0 0 1-4 4H8l-5 3 1.5-4A4 4 0 0 1 4 7h13a4 4 0 0 1 4 4v4z") }
+    function coin() { return svg("M21 7c0 2.21-4.03 4-9 4S3 9.21 3 7m18 5c0 2.21-4.03 4-9 4s-9-1.79-9-4m18 5c0 2.21-4.03 4-9 4s-9-1.79-9-4M3 7c0-2.21 4.03-4 9-4s9 1.79 9 4") }
+
+    // Rellenar iconos de la UI
+    document.querySelectorAll('.fi').forEach(el => {
+      el.innerHTML = el.innerHTML.replace('"+check()+"', check()).replace('"+cross()+"', cross())
+    });
+    document.querySelectorAll('.trust .item').forEach((el, i) => {
+      const icons = [shield(), zap(), chat()];
+      el.innerHTML = icons[i] + el.innerHTML;
+    });
+    document.querySelectorAll('section .badge').forEach(el => {
+      el.innerHTML = coin() + " " + el.innerHTML;
+    })
+  </script>
+</body>
+
+</html>

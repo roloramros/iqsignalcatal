@@ -1,0 +1,78 @@
+<h2>Explicación de Patrones</h2>
+<p>Aquí podrás ver la explicación de cada patrón de velas.</p>
+
+<div class="video-gallery">
+    <!-- Video 1 -->
+    <div class="video-item">
+        <h3>Patrones MHI Minoría y Mayoría</h3>
+        <div class="video-container">
+            <iframe 
+                width="100%" 
+                height="200" 
+                src="https://www.youtube.com/embed/RuQN64CjOLw"
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+    <div class="video-item">
+        <h3>Patrones MHI 2 y MHI 3 (Minoría y Mayoría)</h3>
+        <div class="video-container">
+            <iframe 
+                width="100%" 
+                height="200" 
+                src="https://www.youtube.com/embed/4DHfWfmC2fQ"
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/dist/umd/supabase.min.js"></script>
+
+  <script>
+    const clientesupabase = supabase.createClient(
+      'https://lmhyfgagksvojfkbnygx.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtaHlmZ2Fna3N2b2pma2JueWd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MjA4MzksImV4cCI6MjA2NTk5NjgzOX0.bD-j6tXajDumkB7cuck_9aNMGkrAdnAJLzQACoRYaJo'
+    );
+  </script>
+
+<style>
+    .video-gallery {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 30px;
+    }
+
+    .video-item {
+        width: 480px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .video-item h3 {
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+
+    .video-container {
+        position: relative;
+        padding-bottom: 56.25%; /* Relación de aspecto 16:9 */
+        height: 0;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+
+    .video-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+</style>

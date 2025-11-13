@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma en Mantenimiento</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            /* Fondo animado en rojo y verde */
+            background: linear-gradient(135deg, #ff4d4d, #33cc33, #ff6666, #66ff66);
+            background-size: 400% 400%;
+            animation: gradientBG 10s ease infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            background-color: rgba(0,0,0,0.6);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .countdown {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .loader {
+            border: 6px solid rgba(255,255,255,0.3);
+            border-top: 6px solid #ffd700;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Media Queries para Responsividad */
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            p {
+                font-size: 1rem;
+                margin-bottom: 25px;
+            }
+            
+            .countdown {
+                font-size: 1.8rem;
+            }
+            
+            .loader {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            p {
+                font-size: 0.95rem;
+            }
+            
+            .countdown {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚙️ Volvemos en breve</h1>
+        <p>Estamos mejorando la plataforma para ti. ¡Gracias por tu paciencia!</p>
+        <div class="countdown" id="countdown">60:00</div>
+        <div class="loader"></div>
+    </div>
+
+    <script>
+        // Contador regresivo de 5 minutos
+        let tiempoRestante = 60 * 60; // 5 minutos en segundos (corregido de 30*60 a 5*60)
+        const countdownElement = document.getElementById('countdown');
+
+        function actualizarCountdown() {
+            const minutos = Math.floor(tiempoRestante / 60);
+            const segundos = tiempoRestante % 60;
+            countdownElement.textContent = 
+                `${String(minutos).padStart(2,'0')}:${String(segundos).padStart(2,'0')}`;
+            if(tiempoRestante > 0) {
+                tiempoRestante--;
+            } else {
+                countdownElement.textContent = "¡Listo!";
+                clearInterval(intervalo);
+            }
+        }
+
+        // Actualizar inmediatamente al cargar
+        actualizarCountdown();
+        
+        // Configurar intervalo
+        const intervalo = setInterval(actualizarCountdown, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Backtesting</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Estilos para menú móvil */
+    .mobile-menu-toggle {
+      display: none;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1100;
+      background: #1e1e1e;
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      body {
+        padding-top: 60px;
+      }
+    }
+
+    .candle-strip {
+      display: flex;
+      justify-content: center;
+      padding: 15px;
+      background: #f4f4f4;
+      gap: 13px;
+      flex-wrap: wrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Modal responsive */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      overflow: auto;
+    }
+
+    .modal-content {
+      background: #fff;
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 85vh;
+      overflow-y: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    @media (max-width: 768px) {
+      .modal-content {
+        margin: 10px auto;
+        width: calc(100% - 20px);
+        max-height: calc(100vh - 20px);
+        padding: 15px;
+      }
+    }
+
+    .cerrar {
+      float: right;
+      font-size: 28px;
+      cursor: pointer;
+      line-height: 20px;
+      padding: 0 5px;
+    }
+
+    .modal-body {
+      max-height: calc(70vh - 60px);
+      overflow-y: auto;
+      margin-top: 10px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    @media (max-width: 768px) {
+      .modal-body {
+        max-height: calc(85vh - 80px);
+      }
+    }
+
+    /* Tabla de ocurrencias responsive */
+    #modal-ocurrencias {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    #modal-ocurrencias table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 300px;
+    }
+
+    #modal-ocurrencias th,
+    #modal-ocurrencias td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 480px) {
+
+      #modal-ocurrencias th,
+      #modal-ocurrencias td {
+        padding: 6px 8px;
+        font-size: 13px;
+      }
+    }
+
+    /* Círculo de resultado */
+    .result-circle {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .patron-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-ojito {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: transform 0.2s;
+    }
+
+    .btn-ojito:hover {
+      transform: scale(1.2);
+    }
+
+
+    .candle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.6), rgba(0, 0, 0, 0.2));
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      border: 2px solid #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: #fff;
+      transition: transform 0.2s, box-shadow 0.2s;
+      flex-shrink: 0;
+    }
+
+    .candle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+    }
+
+    @media (max-width: 480px) {
+      .candle {
+        width: 35px;
+        height: 35px;
+        font-size: 10px;
+      }
+    }
+
+    /* Formulario responsive */
+    #formVelas {
+      padding: 10px 15px;
+      background: white;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    @media (max-width: 576px) {
+      #formVelas .btn {
+        font-size: 12px;
+        padding: 6px 12px;
+      }
+
+      #formVelas select {
+        font-size: 13px;
+      }
+    }
+
+    /* Configuración responsive */
+    .config-container {
+      display: flex;
+      gap: 15px;
+      margin: 15px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+      .config-container {
+        margin: 10px;
+        gap: 10px;
+      }
+    }
+
+    .config-box {
+      flex: 1 1 calc(33.333% - 10px);
+      /* 3 columnas iguales */
+      min-width: 280px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid #dee2e6;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    @media (max-width: 768px) {
+      .config-box {
+        flex: 1 1 100%;
+        padding: 12px;
+      }
+    }
+
+    .config-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .config-icon {
+      width: 24px;
+      height: 24px;
+      margin-right: 10px;
+      background-color: #0d6efd;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .config-title {
+      font-weight: 600;
+      color: #0d6efd;
+      margin: 0;
+      font-size: 16px;
+    }
+
+    @media (max-width: 480px) {
+      .config-title {
+        font-size: 14px;
+      }
+    }
+
+    .config-content {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .config-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 480px) {
+      .config-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 5px;
+      }
+
+      .config-row label.config-label {
+        min-width: unset !important;
+      }
+    }
+
+    .config-label {
+      min-width: 140px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .config-label {
+        font-size: 13px;
+      }
+    }
+
+    .config-input {
+      flex: 1;
+    }
+
+    .form-control-sm {
+      font-size: 13px;
+    }
+
+    /* Checkbox personalizado */
+    .form-check-input:checked {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+    }
+
+    /* Estadísticas responsive */
+    .stats-container {
+      display: flex;
+      gap: 15px;
+      margin: 15px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 992px) {
+      .stats-container {
+        flex-direction: column;
+        margin: 10px;
+      }
+    }
+
+    .stats-box {
+      flex: 1;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid #dee2e6;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      max-height: 400px;
+      overflow-y: auto;
+      min-width: 0;
+    }
+
+    @media (max-width: 768px) {
+      .stats-box {
+        max-height: 350px;
+        padding: 12px;
+      }
+    }
+
+    .stats-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .stats-icon {
+      width: 24px;
+      height: 24px;
+      margin-right: 10px;
+      background-color: #6c757d;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .stats-title {
+      font-weight: 600;
+      color: #6c757d;
+      margin: 0;
+      font-size: 16px;
+    }
+
+    @media (max-width: 480px) {
+      .stats-title {
+        font-size: 14px;
+      }
+    }
+
+    .stats-content {
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 480px) {
+      .stats-content {
+        font-size: 11px;
+      }
+    }
+
+    .stats-section {
+      margin-bottom: 15px;
+    }
+
+    .stats-section-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #495057;
+      word-break: break-word;
+    }
+
+    .stats-item {
+      margin-left: 15px;
+      margin-bottom: 3px;
+      word-break: break-word;
+    }
+
+    @media (max-width: 480px) {
+      .stats-item {
+        margin-left: 10px;
+      }
+    }
+
+    .stats-section-dist {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 480px) {
+      .stats-section-dist {
+        gap: 10px;
+      }
+    }
+
+    .stats-section-title-dist {
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .stats-item-dist {
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 480px) {
+      .stats-item-dist {
+        font-size: 12px;
+      }
+    }
+
+    .stats-highlight {
+      color: #0d6efd;
+      font-weight: bold;
+    }
+
+    /* Patrones responsive */
+    .patrones-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .patron-item {
+      background-color: #f8f9fa;
+      border-radius: 6px;
+      padding: 12px;
+      border: 1px solid #dee2e6;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    @media (max-width: 480px) {
+      .patron-item {
+        padding: 10px;
+        font-size: 11px;
+      }
+    }
+
+    .patron-header {
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #0d6efd;
+      border-bottom: 1px dashed #ccc;
+      padding-bottom: 5px;
+      word-break: break-all;
+      cursor: pointer;
+    }
+
+    .patron-detail {
+      margin-bottom: 4px;
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .patron-label {
+      min-width: 90px;
+      font-weight: 500;
+    }
+
+    @media (max-width: 480px) {
+      .patron-label {
+        min-width: 75px;
+        font-size: 10px;
+      }
+    }
+
+    .patron-value {
+      flex: 1;
+      word-break: break-word;
+    }
+
+    .confianza-alta {
+      color: #198754;
+      font-weight: bold;
+    }
+
+    .confianza-media {
+      color: #fd7e14;
+      font-weight: bold;
+    }
+
+    .confianza-baja {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #6c757d;
+      font-style: italic;
+      padding: 20px;
+    }
+
+    /* Popup container responsive */
+    #popup-container {
+      position: fixed;
+      top: 70px;
+      right: 10px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: calc(100vw - 20px);
+    }
+
+    @media (max-width: 480px) {
+      #popup-container {
+        left: 10px;
+        right: 10px;
+      }
+    }
+
+    .popup-alert {
+      background: #222;
+      color: #fff;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      min-width: 250px;
+      max-width: 300px;
+      position: relative;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @media (max-width: 480px) {
+      .popup-alert {
+        min-width: unset;
+        width: 100%;
+        max-width: none;
+        padding: 12px 15px;
+      }
+    }
+
+    .popup-texto {
+      font-size: 14px;
+      text-align: left;
+    }
+
+    @media (max-width: 480px) {
+      .popup-texto {
+        font-size: 12px;
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Ajustes adicionales para móvil */
+    .main-container {
+      display: flex;
+      flex: 1;
+    }
+
+    #indicador-carga {
+      padding: 10px;
+    }
+
+    @media (max-width: 576px) {
+      #indicador-carga strong {
+        font-size: 14px;
+      }
+    }
+
+    .left-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      width: 75%;
+      overflow-y: auto;
+    }
+
+    .right-panel {
+      width: 25%;
+    }
+
+    .patron {
+      width: 100%;
+    }
+
+    .patron h3 {
+      margin: 5px 0;
+      text-align: left;
+      font-size: 17px;
+      font-weight: bold;
+    }
+
+    .cuadros {
+      display: grid;
+      grid-template-columns: repeat(9, 35px);
+      gap: 3px;
+    }
+
+    .cuadro {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 35px;
+      height: 25px;
+      border: 2px solid black;
+      background-color: white;
+      font-weight: bold;
+      color: white;
+    }
+
+    .popup-content {
+      position: relative;
+    }
+
+    .cerrar-popup {
+      position: absolute;
+      top: 5px;
+      right: 8px;
+      background: transparent;
+      color: #fff;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    #popup-texto {
+      font-size: 18px;
+      text-align: center;
+      padding-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Botón toggle para menú móvil -->
+  <button class="mobile-menu-toggle" id="mobileMenuToggle">☰</button>
+
+  <form id="formVelas" class="d-flex flex-wrap align-items-end gap-2">
+    <div>
+      <label for="selectorPar" class="form-label mb-1">Par</label>
+      <select id="selectorPar" name="par" class="form-select form-select-sm" required>
+        <option value="eurusd_otc">EUR/USD OTC</option>
+        <option value="eurgbp_otc">EUR/GBP OTC</option>
+        <option value="usdchf_otc">USD/CHF OTC</option>
+        <option value="audcad_otc">AUD/CAD OTC</option>
+        <option value="gbpusd_otc">GBP/USD OTC</option>
+        <option value="usdxof_otc">USD/XOF OTC</option>
+        <option value="usdsgd_otc">USD/SGD OTC</option>
+        <option value="usdhkd_otc">USD/HKD OTC</option>
+        <option value="usdinr_otc">USD/INR OTC</option>
+        <option value="usdzar_otc">USD/ZAR OTC</option>
+
+        
+      </select>
+    </div>
+
+    <div>
+      <label for="selectorTimeframe" class="form-label mb-1">Timeframe</label>
+      <select id="selectorTimeframe" name="timeframe" class="form-select form-select-sm" required>
+        <option value="1">1 minutos</option>
+        <option value="5">5 minutos</option>
+      </select>
+    </div>
+
+    <div class="d-flex flex-column">
+      <label class="form-label invisible mb-1">.</label>
+      <div class="d-flex gap-1">
+        <button class="btn btn-secondary btn-sm" type="button" id="btnAnalisis">Comenzar Análisis</button>
+        <button class="btn btn-danger btn-sm" type="button" id="btnDetenerAnalisis" disabled>
+          ⹁ Detener Análisis
+        </button>
+      </div>
+    </div>
+
+    <div id="indicador-analizando" class="mt-2" style="display: none;">
+      <i class="fas fa-hourglass-half fa-spin text-warning"></i>
+    </div>
+  </form>
+
+  <!-- Contenedor horizontal para configuraciones -->
+  <div class="config-container">
+    <div class="config-box">
+      <div class="config-header">
+        <div class="config-icon">A</div>
+        <h4 class="config-title">Configuración del Analizador</h4>
+      </div>
+      <div class="config-content">
+        <div class="config-row">
+          <label class="config-label">Apariciones mínimas:</label>
+          <div class="config-input">
+            <input type="number" class="form-control form-control-sm" id="minOcurrencia" min="1" value="20">
+          </div>
+        </div>
+        <div class="config-row">
+          <label class="config-label">Efectividad Mínima (%):</label>
+          <div class="config-input">
+            <input type="number" class="form-control form-control-sm" id="minEfectividad" min="1" max="100" value="68">
+          </div>
+        </div>
+        <div class="config-row">
+          <label class="config-label">Buscar Patrones 4→1:</label>
+          <div class="config-input">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="buscaPatron41" checked>
+            </div>
+          </div>
+        </div>
+        <div class="config-row">
+          <label class="config-label">Buscar Patrones 5→1:</label>
+          <div class="config-input">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="buscaPatron51" checked>
+            </div>
+          </div>
+        </div>
+        <div class="config-row">
+          <label class="config-label">Buscar Patrones 6→1:</label>
+          <div class="config-input">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="buscaPatron61" checked>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+    <!-- Nueva caja al lado con patrón específico -->
+    <div class="config-box">
+      <div class="config-header">
+        <div class="config-icon">P</div>
+        <h4 class="config-title">Análisis de Patrón Específico</h4>
+      </div>
+
+      <div class="config-content">
+        <!-- Campo patrón -->
+        <div class="config-row">
+          <label class="config-label">Patrón a buscar:</label>
+          <div class="config-input">
+            <input type="text" class="form-control form-control-sm" id="patronEspecifico" placeholder="Ej: GGRR">
+          </div>
+        </div>
+
+        <!-- Botón -->
+        <div class="config-row">
+          <label class="config-label"></label>
+          <div class="config-input">
+            <button class="btn btn-sm btn-primary" id="btnAnalizarPatron">Ejecutar</button>
+          </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="config-row">
+          <label class="config-label">Ocurrencias:</label>
+          <span id="resultadoOcurrencias">0</span>
+        </div>
+        <div class="config-row">
+          <label class="config-label">Luego una vela verde:</label>
+          <span id="resultadoVerdes">0</span>
+        </div>
+        <div class="config-row">
+          <label class="config-label">Luego una vela Roja</label>
+          <span id="resultadoRojas">0</span>
+        </div>
+
+
+
+      </div>
+    </div>
+     
+    <!-- Panel de configuración de operativa -->
+    <div class="config-box">
+      <div class="config-header">
+        <div class="config-icon">O</div>
+        <h4 class="config-title">Configuración de Operativa</h4>
+      </div>
+      <div class="config-content">
+        <div class="config-row">
+          <!--  
+          <label class="config-label">Operar Automático:</label>
+          <div class="config-input">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="operarAutomatico">
+            </div>
+          </div>
+          -->
+
+          <label class="config-label">Notificar en Telegram:</label>
+          <div class="config-input">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="notifTelegram" checked>
+            </div>
+          </div>
+          <label class="config-label">Notificar en el Navegador:</label>
+          <div class="config-input">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="notifNavegador" checked>
+            </div>
+          </div>
+        </div>
+        <!--<div class="config-row">
+          
+          <label class="config-label">Monto de Operación ($):</label>
+          <div class="config-input">
+            <input type="number" class="form-control form-control-sm" id="montoOperacion" min="1" value="100">
+          </div>
+        </div>
+        <div class="config-row">
+          <label class="config-label">Cantidad de Martingala:</label>
+          <div class="config-input">
+            <input type="number" class="form-control form-control-sm" id="cantidadMartingala" min="0" value="0">
+          </div>
+        </div>-->
+        <div class="config-row" style="align-items: flex-start;">
+          <label class="config-label">Patrones a Esperar:</label>
+          <div class="config-input">
+            <textarea class="form-control form-control-sm patron-input" id="patronesEsperar" rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+
+  <!-- Contenedor para estadísticas y resultados -->
+  <div class="stats-container">
+    <!-- Panel de estadísticas de la secuencia -->
+    <div class="stats-box">
+      <div class="stats-header">
+        <div class="stats-icon">S</div>
+        <h4 class="stats-title">Estadísticas de la Secuencia</h4>
+      </div>
+      <div class="stats-content">
+        <div class="stats-section">
+          <div class="stats-section-title">=== ESTADÍSTICAS DE LA SECUENCIA ===</div>
+          <div class="stats-item">Total velas: <span id="total-velas" class="stats-highlight"></span></div>
+        </div>
+
+        <div class="stats-section-dist">
+          <div class="stats-section-title-dist">Distribución de colores:</div>
+          <div class="stats-item-dist">G: <span id="dist-g">0</span> (<span id="dist-g-porc"></span>)</div>
+          <div class="stats-item-dist">R: <span id="dist-r">0</span> (<span id="dist-r-porc"></span>)</div>
+        </div>
+
+        <div class="stats-section">
+          <div class="stats-section-title">Transiciones simples (1→1):</div>
+          <div class="stats-item">G→G: <span id="trans-gg">0</span> (<span id="trans-gg-porc"></span>)</div>
+          <div class="stats-item">R→R: <span id="trans-rr">0</span> (<span id="trans-rr-porc"></span>)</div>
+          <div class="stats-item">G→R: <span id="trans-gr">0</span> (<span id="trans-gr-porc"></span>)</div>
+          <div class="stats-item">R→G: <span id="trans-rg">0</span> (<span id="trans-rg-porc"></span>)</div>
+        </div>
+
+        <div class="stats-section">
+          <div class="stats-item">Analizando <span id="patrones-posibles">0</span> posibles patrones...</div>
+          <div class="stats-item">Patrones únicos encontrados: <span id="patrones-unicos"></span></div>
+          <div class="stats-item">Filtrados por Ocurrencias (<span id="min-soporte"></span>): <span
+              id="filtrados-soporte"></span></div>
+          <div class="stats-item">Filtrados por Efectividad (<span id="min-confianza"></span>): <span
+              id="filtrados-confianza"></span></div>
+          <div class="stats-item">Patrones finales: <span id="patrones-finales" class="stats-highlight"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel de resultados de patrones -->
+    <div class="stats-box">
+      <div class="stats-header">
+        <div class="stats-icon">R</div>
+        <h4 class="stats-title">Resultados de Patrones</h4>
+      </div>
+      <div id="resultados-patrones" class="patrones-container">
+        <div class="empty-state" id="empty-state">
+          Ejecuta el análisis para ver los patrones encontrados
+        </div>
+        <!-- Los patrones se insertarán aquí dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+  <div id="indicador-carga" class="mt-3" style="display: none;">
+    <div class="d-flex align-items-center gap-2">
+      <div class="spinner-border text-primary" role="status"></div>
+      <strong>Cargando y Analizando velas, por favor espera...</strong>
+    </div>
+  </div>
+
+  <div class="candle-strip mt-4" id="candle-strip">
+    <!-- Las velas se insertarán aquí dinámicamente -->
+  </div>
+
+  <div class="main-container"></div>
+
+  <div id="popup-container"></div>
+
+  <!-- Modal para los Horarios de los patrones -->
+  <div id="modal-patron" class="modal">
+    <div class="modal-content">
+      <span class="cerrar" onclick="cerrarModal()">&times;</span>
+      <h3 id="modal-titulo"></h3>
+      <div id="modal-ocurrencias" class="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.5/dist/umd/supabase.min.js"></script>
+
+  <script>
+    const supabaseUrl = "<%= supabaseUrl %>";
+    const supabaseKey = "<%= supabaseKey %>";
+    const userId = "<%= user.id %>";
+    const clientesupabase = supabase.createClient(supabaseUrl, supabaseKey);
+  </script>
+
+  <!-- Script para manejo del menú móvil con gestos -->
+  <script>
+    // === CÓDIGO NUEVO PARA MENÚ MÓVIL ===
+    // Variables para el menú móvil
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let menuOpen = false;
+
+    // Detectar swipe desde el borde izquierdo
+    document.addEventListener('touchstart', function (e) {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    document.addEventListener('touchend', function (e) {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    });
+
+    function handleSwipe() {
+      // Swipe desde el borde izquierdo para abrir
+      if (touchStartX < 30 && touchEndX > touchStartX + 50 && !menuOpen) {
+        openSidebarMenu();
+      }
+      // Swipe hacia la izquierda para cerrar
+      else if (menuOpen && touchStartX - touchEndX > 50) {
+        closeSidebarMenu();
+      }
+    }
+
+    function openSidebarMenu() {
+      const sidebar = document.querySelector('.sidebar');
+      if (sidebar) {
+        sidebar.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        menuOpen = true;
+      }
+    }
+
+    function closeSidebarMenu() {
+      const sidebar = document.querySelector('.sidebar');
+      if (sidebar) {
+        sidebar.classList.remove('show');
+        document.body.style.overflow = '';
+        menuOpen = false;
+      }
+    }
+
+    // Botón toggle del menú
+    document.getElementById('mobileMenuToggle')?.addEventListener('click', function () {
+      if (menuOpen) {
+        closeSidebarMenu();
+      } else {
+        openSidebarMenu();
+      }
+    });
+
+    // Cerrar menú al hacer clic fuera
+    document.addEventListener('click', function (e) {
+      if (menuOpen && !e.target.closest('.sidebar') && !e.target.closest('#mobileMenuToggle')) {
+        closeSidebarMenu();
+      }
+    });
+    // === FIN DEL CÓDIGO NUEVO ===
+  </script>
+
+  <!-- Todo el JavaScript original sin modificación -->
+  <script>
+
+    const selectorPar = document.getElementById("selectorPar");
+    const selectorTimeframe = document.getElementById("selectorTimeframe");
+    let parAnalizado = obtenerTabla(selectorPar.value, selectorTimeframe.value);
+    function obtenerTabla(par, timeframe) {
+      return timeframe === "1" ? par : `${par}_${timeframe}min`;
+    }
+    function actualizarTabla() {
+      parAnalizado = obtenerTabla(selectorPar.value, selectorTimeframe.value);
+      console.log("Tabla actualizada:", parAnalizado);
+    }
+    selectorPar.addEventListener("change", actualizarTabla);
+    selectorTimeframe.addEventListener("change", actualizarTabla);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function normalizeColor(color) {
+      if (!color) return null;
+      color = String(color).toLowerCase().trim();
+      if (color.startsWith('r') || color === 'red') return 'R';
+      if (color.startsWith('g') || color === 'green') return 'G';
+      if (color.startsWith('d') || color === 'doji') return 'D';
+      return null;
+    }
+
+    async function cargarVelas(par) {
+      velas = [];
+      const pageSize = 1000; // máximo permitido
+      let start = 0;
+      let allData = [];
+      while (true) {
+        const { data, error } = await clientesupabase
+          .from(parAnalizado)
+          .select("*")
+          .order("id", { ascending: true })
+          .range(start, start + pageSize - 1);
+        if (error) {
+          console.error("Error al cargar velas:", error);
+          break;
+        }
+        if (!data || data.length === 0) {
+          break;
+        }
+        allData = allData.concat(data);
+        if (data.length < pageSize) {
+          break;
+        }
+        start += pageSize;
+      }
+
+      // Transformamos al formato que querías
+      velas = allData.map((row, index) => ({
+        id: row.id, // numeración secuencial
+        start_time: row.start_time,
+        end_time: row.end_time,
+        candle_color: row.candle_color,
+      }));
+      velas.pop();
+      return velas;
+    }
+
+    function analizarPatronesN(velas, nContexto, minSoporte, minConfianza) {
+      if (velas.length < nContexto + 1) {
+        console.error(`ERROR: Necesito al menos ${nContexto + 1} velas`);
+        return { resultados: [], estadisticas: {} };
+      }
+
+      // Extraer colores
+      const colores = velas.map(v => normalizeColor(v.candle_color));
+
+      // Estadísticas básicas
+      estadisticas = {
+        totalVelas: colores.length,
+        distribucionColores: { R: 0, G: 0 },
+        transiciones: { 'G→G': 0, 'R→R': 0, 'G→R': 0, 'R→G': 0 },
+        patronesUnicos: 0,
+        filtradosSoporte: 0,
+        filtradosConfianza: 0,
+        patronesFinales: 0,
+        patronesPosibles: colores.length - nContexto
+      };
+
+      // Contar distribución de colores
+      for (const color of colores) {
+        if (color === 'R') estadisticas.distribucionColores.R++;
+        if (color === 'G') estadisticas.distribucionColores.G++;
+      }
+
+      // Contar transiciones simples
+      for (let i = 0; i < colores.length - 1; i++) {
+        const transicion = colores[i] + '→' + colores[i + 1];
+        if (estadisticas.transiciones[transicion] !== undefined) {
+          estadisticas.transiciones[transicion]++;
+        }
+      }
+
+      const patrones = {};
+      const ocurrenciasPatron = {};
+
+      for (let i = 0; i <= colores.length - (nContexto + 1); i++) {
+        const contexto = colores.slice(i, i + nContexto).join('');
+        const siguienteColor = colores[i + nContexto];
+
+        if (!patrones[contexto]) patrones[contexto] = { R: 0, G: 0 };
+        patrones[contexto][siguienteColor]++;
+
+        if (!ocurrenciasPatron[contexto]) ocurrenciasPatron[contexto] = [];
+        ocurrenciasPatron[contexto].push({
+          indice: i,
+          horaInicio: velas[i].start_time,
+          horaFin: velas[i + nContexto].end_time,
+          secuenciaContexto: colores.slice(i, i + nContexto),
+          siguienteColor: siguienteColor,
+          secuenciaCompleta: colores.slice(i, i + nContexto + 1),
+          idsVelas: velas.slice(i, i + nContexto + 1).map(v => v.id)
+        });
+      }
+
+      estadisticas.patronesUnicos = Object.keys(patrones).length;
+      for (const [contexto, conteos] of Object.entries(patrones)) {
+        const soporteTotal = conteos.R + conteos.G;
+        if (soporteTotal >= minSoporte) {
+          let colorPredicho = conteos.R >= conteos.G ? 'R' : 'G';
+          let conteoPrediccion = Math.max(conteos.R, conteos.G);
+          const confianza = conteoPrediccion / soporteTotal;
+          if (confianza >= minConfianza) {
+            resultados.push({
+              patron: contexto,
+              soporte: soporteTotal,
+              colorPredicho,
+              conteoPrediccion,
+              confianza,
+              distribucion: { ...conteos },
+              ocurrencias: ocurrenciasPatron[contexto] || []
+            });
+          } else {
+            estadisticas.filtradosConfianza++;
+          }
+        } else {
+          estadisticas.filtradosSoporte++;
+        }
+      }
+      // Ordenar por confianza y soporte
+      resultados.sort((a, b) => {
+        if (b.confianza !== a.confianza) return b.confianza - a.confianza;
+        return b.soporte - a.soporte;
+      });
+      estadisticas.patronesFinales = resultados.length;
+      return { resultados, estadisticas };
+    }
+
+    function actualizarEstadisticasUI(estadisticas) {
+      // Si no hay datos en estadisticas, limpiamos todo y salimos
+      if (!estadisticas || estadisticas.length === 0) {
+        document.getElementById('total-velas').textContent = "";
+
+        // Distribución
+        document.getElementById('dist-r').textContent = "";
+        document.getElementById('dist-r-porc').textContent = "";
+        document.getElementById('dist-g').textContent = "";
+        document.getElementById('dist-g-porc').textContent = "";
+
+        // Transiciones
+        document.getElementById('trans-gg').textContent = "";
+        document.getElementById('trans-gg-porc').textContent = "";
+        document.getElementById('trans-rr').textContent = "";
+        document.getElementById('trans-rr-porc').textContent = "";
+        document.getElementById('trans-gr').textContent = "";
+        document.getElementById('trans-gr-porc').textContent = "";
+        document.getElementById('trans-rg').textContent = "";
+        document.getElementById('trans-rg-porc').textContent = "";
+
+        // Patrones
+        document.getElementById('patrones-posibles').textContent = "";
+        document.getElementById('patrones-unicos').textContent = "";
+        document.getElementById('min-soporte').textContent = "";
+        document.getElementById('filtrados-soporte').textContent = "";
+        document.getElementById('min-confianza').textContent = "";
+        document.getElementById('filtrados-confianza').textContent = "";
+        document.getElementById('patrones-finales').textContent = "";
+
+        return; // salir sin ejecutar el resto
+      }
+
+      // Si hay datos → seguimos con tu código original
+      document.getElementById('total-velas').textContent = estadisticas.totalVelas;
+
+      // Distribución de colores
+      const total = estadisticas.totalVelas;
+      const pctR = ((estadisticas.distribucionColores.R / total) * 100).toFixed(1);
+      const pctG = ((estadisticas.distribucionColores.G / total) * 100).toFixed(1);
+
+      document.getElementById('dist-r').textContent = estadisticas.distribucionColores.R;
+      document.getElementById('dist-r-porc').textContent = `${pctR}%`;
+      document.getElementById('dist-g').textContent = estadisticas.distribucionColores.G;
+      document.getElementById('dist-g-porc').textContent = `${pctG}%`;
+
+      // Transiciones
+      const totalTransiciones = estadisticas.totalVelas - 1;
+      const pctGG = ((estadisticas.transiciones['G→G'] / totalTransiciones) * 100).toFixed(1);
+      const pctRR = ((estadisticas.transiciones['R→R'] / totalTransiciones) * 100).toFixed(1);
+      const pctGR = ((estadisticas.transiciones['G→R'] / totalTransiciones) * 100).toFixed(1);
+      const pctRG = ((estadisticas.transiciones['R→G'] / totalTransiciones) * 100).toFixed(1);
+
+      document.getElementById('trans-gg').textContent = estadisticas.transiciones['G→G'];
+      document.getElementById('trans-gg-porc').textContent = `${pctGG}%`;
+      document.getElementById('trans-rr').textContent = estadisticas.transiciones['R→R'];
+      document.getElementById('trans-rr-porc').textContent = `${pctRR}%`;
+      document.getElementById('trans-gr').textContent = estadisticas.transiciones['G→R'];
+      document.getElementById('trans-gr-porc').textContent = `${pctGR}%`;
+      document.getElementById('trans-rg').textContent = estadisticas.transiciones['R→G'];
+      document.getElementById('trans-rg-porc').textContent = `${pctRG}%`;
+
+      // Patrones
+      document.getElementById('patrones-posibles').textContent = estadisticas.patronesPosibles;
+      document.getElementById('patrones-unicos').textContent = estadisticas.patronesUnicos;
+      document.getElementById('min-soporte').textContent = document.getElementById('minOcurrencia').value;
+      document.getElementById('filtrados-soporte').textContent = estadisticas.filtradosSoporte;
+      document.getElementById('min-confianza').textContent = document.getElementById('minEfectividad').value;
+      document.getElementById('filtrados-confianza').textContent = estadisticas.filtradosConfianza;
+      document.getElementById('patrones-finales').textContent = estadisticas.patronesFinales;
+    }
+
+    function mostrarResultadosPatrones(resultados) {
+      const contenedor = document.getElementById('resultados-patrones');
+      let emptyState = document.getElementById('empty-state');
+
+      // Si el elemento no existe, crearlo
+      if (!emptyState) {
+        emptyState = document.createElement('div');
+        emptyState.className = 'empty-state';
+        emptyState.id = 'empty-state';
+        emptyState.textContent = 'Ejecuta el análisis para ver los patrones encontrados';
+
+        if (contenedor) {
+          contenedor.appendChild(emptyState);
+        } else {
+          console.error('Contenedor de resultados no encontrado');
+          return;
+        }
+      }
+
+      // Limpiar contenedor (excepto el empty-state)
+      if (contenedor) {
+        const elementos = contenedor.querySelectorAll(':not(#empty-state)');
+        elementos.forEach(el => el.remove());
+      }
+
+      if (resultados.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+
+      // Crear elementos para cada patrón
+      resultados.forEach(patron => {
+        const confianzaClase = patron.confianza >= 0.7 ? 'confianza-alta' :
+          patron.confianza >= 0.6 ? 'confianza-media' : 'confianza-baja';
+
+        const confianzaPorcentaje = (patron.confianza * 100).toFixed(1);
+
+        const patronElement = document.createElement('div');
+        patronElement.className = 'patron-item';
+        patronElement.innerHTML = `
+      <div class="patron-header">
+        <span>Patrón: ${patron.patron} → ${patron.colorPredicho}</span>
+        <button class="btn-ojito" title="Añadir a la lista">
+          👁️
+        </button>
+      </div>
+      <div class="patron-detail">
+        <span class="patron-label">Se repitió:</span>
+        <span class="patron-value">${patron.soporte} veces</span>
+      </div>
+      <div class="patron-detail">
+        <span class="patron-label">Efectvidad:</span>
+        <span class="patron-value ${confianzaClase}">${confianzaPorcentaje}% (${patron.conteoPrediccion}/${patron.soporte})</span>
+      </div>
+      <div class="patron-detail">
+        <span class="patron-label">Distribución:</span>
+        <span class="patron-value">{'R': ${patron.distribucion.R || 0}, 'G': ${patron.distribucion.G || 0}}</span>
+      </div>
+    `;
+
+        const header = patronElement.querySelector('.patron-header span');
+        header.addEventListener('click', () => abrirModal(patron));
+
+        const botonOjito = patronElement.querySelector('.btn-ojito');
+        const textarea = document.getElementById('patronesEsperar');
+        const patronTexto = `${patron.patron} → ${patron.colorPredicho}`;
+
+        // Restaurar estado previo si existe
+        if (ojosAbiertos[patron.patron]) {
+          botonOjito.innerHTML = '<i class="bi bi-eye"></i>'; // abierto
+          if (textarea && !textarea.value.includes(patronTexto)) {
+            if (textarea.value.trim() === '') textarea.value = patronTexto;
+            else textarea.value += `, ${patronTexto}`;
+          }
+        } else {
+          botonOjito.innerHTML = '<i class="bi bi-eye-slash"></i>'; // cerrado
+        }
+
+        botonOjito.addEventListener('click', () => {
+          const icono = botonOjito.querySelector('i');
+
+          if (icono.classList.contains('bi-eye-slash')) {
+            // Estaba cerrado → lo abrimos
+            botonOjito.innerHTML = '<i class="bi bi-eye"></i>';
+            ojosAbiertos[patron.patron] = true;
+            if (textarea) {
+              if (textarea.value.trim() === '') textarea.value = patronTexto;
+              else if (!textarea.value.includes(patronTexto)) textarea.value += `, ${patronTexto}`;
+            }
+          } else {
+            // Estaba abierto → lo cerramos
+            botonOjito.innerHTML = '<i class="bi bi-eye-slash"></i>';
+            ojosAbiertos[patron.patron] = false;
+            if (textarea) {
+              let patrones = textarea.value.split(',').map(p => p.trim());
+              patrones = patrones.filter(p => p !== patronTexto);
+              textarea.value = patrones.join(', ');
+            }
+          }
+        });
+
+        if (contenedor) {
+          contenedor.appendChild(patronElement);
+        }
+      });
+    }
+
+    async function mostrarVelas(velas) {
+      const contenedor = document.getElementById('candle-strip');
+      contenedor.innerHTML = '';
+      velasMostrar = velas.slice(-6);
+      velasMostrar.forEach(vela => {
+        const velaElement = document.createElement('div');
+        velaElement.className = 'candle';
+        velaElement.style.backgroundColor =
+          vela.candle_color === "red"
+            ? "#dc3545"   // rojo
+            : vela.candle_color === "green"
+              ? "#198754"   // verde
+              : "#6c757d";  // doji (gris)
+        velaElement.title = `Hora: ${vela.end_time}`;
+        // Mostrar solo la primera letra del color
+        const minuto = vela.start_time.split(":")[1];
+        // Mostrar el minuto dentro del círculo/vela
+        velaElement.textContent = minuto;
+        contenedor.appendChild(velaElement);
+      });
+    }
+
+    async function esperarNuevaVela() {
+      while (ejecutandoAnalisis) {
+        try {
+          console.log(ultimaVelaProcesada)
+          const { data, error } = await clientesupabase
+            .from(parAnalizado)
+            .select('id, start_time, end_time, candle_color')
+            .order('id', { ascending: false })
+            .limit(1);
+          if (!error && data.length > 0) {
+            const velaActual = data[0];
+            if (!ultimaVelaProcesada || ultimaVelaProcesada.id !== velaActual.id) {
+              ultimaVelaProcesada = velaActual;
+              await cargarVelas();
+              velas.push(ultimaVelaProcesada);
+              mostrarVelas(velas);
+              updatePatternsFromTextarea();
+              buscarPatronEnUltimasVelas(patronConfirmacion, velasMostrar);
+              actualizarEstadisticas();
+              const sleep_time = (calculateSecondsToNextMinute() - 2) * 1000;
+              await new Promise(resolve => setTimeout(resolve, sleep_time));
+            }
+          }
+        } catch (e) {
+          console.error("⚠️ Error leyendo velas:", e);
+        }
+
+       
+
+
+
+      }
+    }
+
+
+
+    function calculateSecondsToNextMinute() {
+      const now = new Date();
+      const secondsCurrentMinute = now.getSeconds();
+      const milliseconds = now.getMilliseconds() / 1000;
+      let secondsToNextMinute = 60 - secondsCurrentMinute - milliseconds;
+      secondsToNextMinute += 0.1
+      return Math.max(0.1, secondsToNextMinute); // Mínimo 0.1 segundos
+    }
+
+    function updatePatternsFromTextarea() {
+      patronConfirmacion = [];
+      velaCondicional = [];
+      operacionEsperada = [];
+      const textarea = document.getElementById('patronesEsperar');
+      if (!textarea) return;
+
+      const raw = textarea.value.trim();
+      if (!raw) {
+        return;
+      }
+      // separar por coma
+      const items = raw.split(/\s*,\s*/).map(s => s.trim()).filter(Boolean);
+      items.forEach(item => {
+        // dividir en "patron → operacion"
+        const parts = item.split(/(?:→|->|=>|>|:)/).map(s => s.trim()).filter(Boolean);
+        const left = (parts[0] || '').replace(/\s+/g, '').toUpperCase(); // ej. RRGGRR
+        const right = (parts[1] || '').replace(/\s+/g, '').toUpperCase(); // ej. G
+        if (left.length === 0) return;
+        const ultima = left.slice(-1);   // última vela
+        const sec = left.slice(0, -1);   // todas menos la última
+        patronConfirmacion.push(sec);
+        velaCondicional.push(ultima);
+        operacionEsperada.push(right);
+      });
+    }
+
+    function buscarPatronEnUltimasVelas(patronConfirmacion, velasMostrar) {
+      // Mapear colores a letras
+      const mapColor = {
+        green: "G",
+        red: "R",
+        gray: "E"
+      };
+      // Convertir velasMostrar a una cadena de letras
+      const secuenciaVelas = velasMostrar.map(v => mapColor[v.candle_color] || "").join("");
+      patronesEncontrados = [];
+      patronConfirmacion.forEach(patron => {
+        // Tomar las últimas N velas según el tamaño del patrón
+        const ultimas = secuenciaVelas.slice(-patron.length);
+        if (ultimas === patron) {
+          const velasCumplen = velasMostrar.slice(-patron.length);
+          const indice = patronConfirmacion.indexOf(patron);
+
+          const patronBuscado = patronConfirmacion[indice] + velaCondicional[indice];
+
+          const reconstruido = patronConfirmacion[indice] +
+            velaCondicional[indice] +
+            " → " +
+            operacionEsperada[indice];
+
+          patronesEncontrados.push({
+            patron: patron,
+            velas: velasCumplen,
+            patronCompleto: reconstruido
+          });
+
+          const ahora = new Date();
+          const hora_final = ahora.getHours().toString().padStart(2, '0') + ':' +
+            ahora.getMinutes().toString().padStart(2, '0');
+          const mapCondicion = {
+            G: "Alcista",
+            R: "Bajista"
+          };
+          const mapOperacion = {
+            G: "CALL",
+            R: "PUT"
+          };
+          const condicionTexto = mapCondicion[velaCondicional[indice]] || velaCondicional[indice];
+          const operacionTexto = mapOperacion[operacionEsperada[indice]] || operacionEsperada[indice];
+
+          const encontrado = resultados.find(r => r.patron === patronBuscado);
+          const confianza = encontrado ? encontrado.confianza : null;
+          const ocurrencia = encontrado ? encontrado.soporte : null;
+
+          const textoPopup = `
+                          Activo: ${parAnalizado}<br>
+                          Patrón: ${reconstruido} Casi Formado<br>
+                          Si Vela ${hora_final} es ${condicionTexto}<br>
+                          Próxima Vela: ${operacionTexto} (${(confianza * 100).toFixed(2)} %)<br>
+                          Se ha repetido: ${ocurrencia} veces<br>
+                        `;
+          const textoTelegram = `Activo: ${parAnalizado}\n` +
+            `Patrón: ${reconstruido} Casi Formado\n` +
+            `Si Vela ${hora_final} es ${condicionTexto}\n` +
+            `Próxima Vela: ${operacionTexto} (${(confianza * 100).toFixed(2)} %)\n` +
+            `Se ha repetido: ${ocurrencia} veces\n`;
+
+          const notifNavegador = document.getElementById("notifNavegador");
+          if (notifNavegador.checked) {
+            mostrarPopup(textoPopup);
+          }
+          const notifTelegram = document.getElementById("notifTelegram");
+          if (notifTelegram.checked) {
+            envioTelegram(textoTelegram);
+          }
+        }
+      });
+      return patronesEncontrados;
+    }
+
+    async function mostrarPopup(Messaje) {
+      const container = document.getElementById("popup-container");
+      const popup = document.createElement("div");
+      popup.className = "popup-alert";
+      popup.innerHTML = `
+                <div class="popup-content">
+                    <button class="cerrar-popup" onclick="this.parentElement.parentElement.remove()">✖</button>
+                    <div class="popup-texto">${Messaje}</div>
+                </div>
+            `;
+      container.appendChild(popup);
+    }
+
+    function cerrarPopup() {
+      document.getElementById("popup-señal").style.display = "none";
+    }
+
+    async function envioTelegram(Messaje) {
+      const token = '7971141664:AAFNFXWpHePHVkaedf1F75GKUk4bHwcJ_HE';
+      try {
+        // Obtener el chat_id del usuario desde Supabase
+        const { data: telegramData, error: telegramError } = await clientesupabase
+          .from('user_config')
+          .select('chat_id')
+          .eq('user_id', userId)
+          .single();
+
+        if (telegramError || !telegramData || !telegramData.chat_id) {
+          console.error('Error al obtener chat_id de Telegram:', telegramError?.message || 'No se encontró chat_id');
+          return false;
+        }
+        const chatId = telegramData.chat_id;
+        await fetch("/sendMessage", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: Messaje,
+            chatId: chatId // dinámico
+          })
+        });
+        return true;
+      } catch (error) {
+        console.error('Error completo al enviar a Telegram:', {
+          error: error.message
+        });
+        return false;
+      }
+    }
+
+    // Ejecutar al cargar y cada vez que cambie el textarea
+    document.addEventListener('DOMContentLoaded', () => {
+      updatePatternsFromTextarea();
+      const textarea = document.getElementById('patronesEsperar');
+      if (textarea) {
+        textarea.addEventListener('input', updatePatternsFromTextarea);
+      }
+    });
+
+    async function ejecutarAnalisis() {
+      document.getElementById("btnAnalisis").disabled = true;
+      document.getElementById("selectorPar").disabled = true;
+      document.getElementById("btnDetenerAnalisis").disabled = false;
+      document.getElementById('indicador-analizando').style.display = 'block';
+      document.getElementById('indicador-carga').style.display = 'block';
+      const selectorPar = document.getElementById("selectorPar");
+      const parSeleccionado = selectorPar.options[selectorPar.selectedIndex].text;
+      document.title = `Escaneando: ${parSeleccionado}`;
+      if (patronesSeleccionados[4]) {
+        await analizarPatron(4);
+      } if (patronesSeleccionados[5]) {
+        await analizarPatron(5);
+      } if (patronesSeleccionados[6]) {
+        await analizarPatron(6);
+      }
+      actualizarEstadisticasUI(estadisticas);
+      mostrarResultadosPatrones(resultados);
+      ejecutandoAnalisis = true;
+      esperarNuevaVela();
+    }
+
+    async function actualizarEstadisticas() {
+      resultados = [];
+      estadisticas = []
+      if (patronesSeleccionados[4]) {
+        await analizarPatron(4);
+      } if (patronesSeleccionados[5]) {
+        await analizarPatron(5);
+      } if (patronesSeleccionados[6]) {
+        await analizarPatron(6);
+      }
+      actualizarEstadisticasUI(estadisticas);
+      mostrarResultadosPatrones(resultados);
+    }
+
+    async function detenerAnalisis() {
+      ejecutandoAnalisis = false;
+      document.getElementById("btnAnalisis").disabled = false;
+      document.getElementById("selectorPar").disabled = false;
+      document.getElementById("btnDetenerAnalisis").disabled = true;
+      document.title = `Escáner de Patrones`;
+
+      resultados = [];
+      estadisticas = []
+      actualizarEstadisticasUI(estadisticas);
+      mostrarResultadosPatrones(resultados);
+      const contenedor = document.getElementById('candle-strip');
+      contenedor.innerHTML = ''; // borra todo lo que había (las velas)
+      document.getElementById('indicador-analizando').style.display = 'none';
+    }
+
+    function analizarPatronEspecifico(velas, patron) {
+      if (!patron || patron.length === 0) {
+        console.error("Debes ingresar un patrón válido (ej: 'GGR')");
+        return { ocurrencias: 0, verdes: 0, rojas: 0 };
+      }
+      // Normalizamos las velas a colores simples
+      const colores = velas.map(v => normalizeColor(v.candle_color));
+      const n = patron.length;
+      let ocurrencias = 0;
+      let verdes = 0;
+      let rojas = 0;
+      for (let i = 0; i <= colores.length - (n + 1); i++) {
+        const contexto = colores.slice(i, i + n).join('');
+        if (contexto === patron) {
+          ocurrencias++;
+          const siguiente = colores[i + n];
+          if (siguiente === 'G') verdes++;
+          if (siguiente === 'R') rojas++;
+        }
+      }
+
+      return { ocurrencias, verdes, rojas };
+    }
+
+    document.getElementById("btnAnalizarPatron").addEventListener("click", () => {
+      const patron = document.getElementById("patronEspecifico").value.trim().toUpperCase();
+      const resultados = analizarPatronEspecifico(velas, patron);
+      // Calculamos porcentajes
+      const porcentajeVerdes = resultados.ocurrencias ? ((resultados.verdes / resultados.ocurrencias) * 100).toFixed(1) : 0;
+      const porcentajeRojas = resultados.ocurrencias ? ((resultados.rojas / resultados.ocurrencias) * 100).toFixed(1) : 0;
+      // Mostramos resultados
+      document.getElementById("resultadoOcurrencias").textContent = resultados.ocurrencias;
+      document.getElementById("resultadoVerdes").textContent = `${resultados.verdes} (${porcentajeVerdes}%)`;
+      document.getElementById("resultadoRojas").textContent = `${resultados.rojas} (${porcentajeRojas}%)`;
+    });
+
+
+    // Función principal para ejecutar el análisis
+    async function analizarPatron(analisisSeleccionado) {
+      const par = document.getElementById('selectorPar').value;
+      const minOcurrencia = parseInt(document.getElementById('minOcurrencia').value);
+      const minEfectividad = parseInt(document.getElementById('minEfectividad').value) / 100;
+      try {
+        velas = await cargarVelas(par);
+        let { resultados, estadisticas } = analizarPatronesN(velas, analisisSeleccionado, minOcurrencia, minEfectividad);
+      } catch (error) {
+        console.error('Error en el análisis:', error);
+        alert('Error al ejecutar el análisis: ' + error.message);
+      } finally {
+        document.getElementById('indicador-carga').style.display = 'none';
+      }
+    }
+
+    // Configurar event listeners
+    document.getElementById('btnAnalisis').addEventListener('click', ejecutarAnalisis);
+    document.getElementById('btnDetenerAnalisis').addEventListener('click', detenerAnalisis);
+
+    // Variable global para guardar el patrón seleccionado
+    const checkboxes = [
+      { cb: document.getElementById('buscaPatron41'), valor: 4 },
+      { cb: document.getElementById('buscaPatron51'), valor: 5 },
+      { cb: document.getElementById('buscaPatron61'), valor: 6 }
+    ];
+    let patronesSeleccionados = { 4: true, 5: true, 6: true };
+    checkboxes.forEach(({ cb, valor }) => {
+      cb.addEventListener('change', () => {
+        patronesSeleccionados[valor] = cb.checked; // Guardar true o false
+      });
+    });
+  </script>
+
+  <script>
+    let ultimaVelaProcesada = null; // Almacenará el ID o timestamp de la última vela procesada
+    let patronSeleccionado = 4; // Por defecto, el 4→1
+    let velas = [];
+    let patronConfirmacion = [];
+    let velaCondicional = [];
+    let operacionEsperada = [];
+    let velasMostrar = [];
+    let patronesEncontrados = [];
+    let ejecutandoAnalisis = false;
+    let resultados = [];
+    let estadisticas = [];
+    const ojosAbiertos = {}; // key = patron.patron, value = true/false
+  </script>
+
+  <script>
+    function abrirModal(patron) {
+      document.getElementById("modal-titulo").innerText = `Patrón: ${patron.patron} → ${patron.colorPredicho}`;
+
+      const contenedor = document.getElementById("modal-ocurrencias");
+      contenedor.innerHTML = ""; // limpiar
+
+      if (patron.ocurrencias && patron.ocurrencias.length > 0) {
+        const tabla = document.createElement("table");
+
+        // encabezado
+        const thead = document.createElement("thead");
+        thead.innerHTML = `
+      <tr>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Resultado</th>
+      </tr>
+    `;
+        tabla.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+
+        patron.ocurrencias.forEach(o => {
+          const tr = document.createElement("tr");
+
+          // columnas de hora
+          const tdInicio = document.createElement("td");
+          tdInicio.textContent = o.horaInicio;
+          const tdFin = document.createElement("td");
+          tdFin.textContent = o.horaFin;
+
+          // columna de resultado
+          const tdResultado = document.createElement("td");
+          const acierto = o.siguienteColor === patron.colorPredicho;
+          const circle = document.createElement("span");
+          circle.className = "result-circle";
+          circle.style.backgroundColor = acierto ? "green" : "red";
+          tdResultado.appendChild(circle);
+
+          tr.appendChild(tdInicio);
+          tr.appendChild(tdFin);
+          tr.appendChild(tdResultado);
+          tbody.appendChild(tr);
+        });
+
+        tabla.appendChild(tbody);
+        contenedor.appendChild(tabla);
+
+      } else {
+        contenedor.innerHTML = "<p>No hay ocurrencias registradas</p>";
+      }
+
+      document.getElementById("modal-patron").style.display = "block";
+    }
+
+    function cerrarModal() {
+      document.getElementById("modal-patron").style.display = "none";
+    }
+
+    // Cerrar si se hace click fuera del contenido
+    window.addEventListener("click", (e) => {
+      const modal = document.getElementById("modal-patron");
+      if (e.target === modal) {
+        cerrarModal();
+      }
+    });
+  </script>
+
+</body>
+
+</html>

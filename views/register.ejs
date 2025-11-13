@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Registro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <style>
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('/login.jpg');
+      /* Cambia por tu imagen */
+      background-size: auto;
+      background-position: center;
+      z-index: -1;
+      /* Poner detrás del contenido */
+    }
+
+    .tooltip-inner {
+      max-width: 300px;
+      text-align: left;
+    }
+
+    .input-group-text {
+      cursor: pointer;
+      background-color: #f8f9fa;
+    }
+
+    .is-invalid {
+      border-color: #dc3545 !important;
+    }
+
+    .invalid-feedback {
+      display: none;
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+  </style>
+</head>
+
+<body class="bg-light d-flex justify-content-center align-items-center vh-100">
+
+  <div class="card shadow p-4" style="min-width: 350px;">
+    <h3 class="mb-3 text-center">Registro de Usuario</h3>
+
+    <% if (error) { %>
+      <div class="alert alert-danger" role="alert">
+        <%= error %>
+      </div>
+      <% } %>
+        <% if (success) { %>
+          <div class="alert alert-success" role="alert">
+            <%= success %>
+              <br>
+              <a href="<%= telegramUrl %>" target="_blank">Conectar con Telegram</a>
+          </div>
+          <% } %>
+
+            <form action="/register" method="post" id="registerForm">
+              <div class="mb-3">
+                <input type="email" name="email" id="email" class="form-control" placeholder="Correo electrónico"
+                  required>
+              </div>
+              <div class="mb-3">
+                <input type="password" name="password" id="password" class="form-control" placeholder="Contraseña"
+                  required minlength="6">
+              </div>
+
+              <div class="mb-3">
+                <div class="input-group">
+                  <input type="text" name="telegram_username" id="telegram_username" class="form-control"
+                    placeholder="@UsuarioDeTelegram" required pattern="^@.*">
+                  <span class="input-group-text" data-bs-toggle="tooltip" data-bs-placement="right"
+                    title="Por favor ingresa tu usuario de Telegram completo comenzando con @ (ej: @mi_usuario) para recibir señales de trading en tiempo real.">
+                    <i class="bi bi-question-circle-fill text-primary"></i>
+                  </span>
+                </div>
+                <div class="invalid-feedback" id="telegramError">
+                  El usuario de Telegram debe comenzar con @
+                </div>
+              </div>
+              <!-- Correo de acceso a IQ Option -->
+              <div class="mb-3">
+                <div class="input-group">
+                  <input type="email" name="iqoption_email" id="iqoption_email" class="form-control"
+                    placeholder="Correo de acceso a IQ Option">
+                  <span class="input-group-text" data-bs-toggle="tooltip" data-bs-placement="right" title="Se solicita el correo de IQ Option para 
+                                asociar tu suscripción con tu cuenta de trading para los bots automaticos, no será compartido con terceros. Puede dejarlo
+                                vacío si no piensa usar bots automaticos">
+                    <i class="bi bi-question-circle-fill text-primary"></i>
+                  </span>
+                </div>
+                <div class="invalid-feedback" id="iqoptionError">
+                  Por favor ingresa un correo válido.
+                </div>
+              </div>
+
+
+
+
+
+              <button type="submit" class="btn btn-success w-100" id="submitBtn" disabled>Registrar</button>
+            </form>
+
+            <div class="text-center mt-3">
+              <a href="/">¿Ya tienes cuenta? Inicia sesión</a>
+            </div>
+  </div>
+
+  <!-- Scripts de Bootstrap y inicialización de tooltips -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Inicializa los tooltips
+    document.addEventListener('DOMContentLoaded', function () {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl, {
+          trigger: 'hover focus'
+        });
+      });
+
+      // Inicializar la validación
+      checkFormValidity();
+    });
+
+    // Elementos del DOM
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const telegramInput = document.getElementById('telegram_username');
+    const submitBtn = document.getElementById('submitBtn');
+    const telegramError = document.getElementById('telegramError');
+
+    // Validar usuario de Telegram
+    function validateTelegramUsername() {
+      if (!telegramInput.value.startsWith('@')) {
+        telegramInput.classList.add('is-invalid');
+        telegramError.style.display = 'block';
+        return false;
+      } else {
+        telegramInput.classList.remove('is-invalid');
+        telegramError.style.display = 'none';
+        return true;
+      }
+    }
+
+    // Verificar validez de todo el formulario
+    function checkFormValidity() {
+      const isEmailValid = emailInput.value.trim() !== '' && emailInput.checkValidity();
+      const isPasswordValid = passwordInput.value.trim() !== '' && passwordInput.checkValidity();
+      const isTelegramValid = validateTelegramUsername();
+
+      // Habilitar botón solo si todos los campos son válidos
+      if (isEmailValid && isPasswordValid && isTelegramValid) {
+        submitBtn.disabled = false;
+      } else {
+        submitBtn.disabled = true;
+      }
+    }
+
+    // Event listeners para validación en tiempo real
+    emailInput.addEventListener('input', checkFormValidity);
+    passwordInput.addEventListener('input', checkFormValidity);
+    telegramInput.addEventListener('input', checkFormValidity);
+
+    // Validación adicional al enfocar/desenfocar
+    telegramInput.addEventListener('blur', function () {
+      validateTelegramUsername();
+      checkFormValidity();
+    });
+
+    // Prevenir envío si aún no es válido (doble seguridad)
+    document.getElementById('registerForm').addEventListener('submit', function (e) {
+      if (submitBtn.disabled) {
+        e.preventDefault();
+        // Forzar validación visual de todos los campos
+        checkFormValidity();
+        telegramInput.focus();
+      }
+    });
+  </script>
+</body>
+
+</html>

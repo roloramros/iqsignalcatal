@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>
+    <%= title %>
+  </title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      min-height: 100vh;
+      background-color: #1e1e1e;
+      padding-top: 1rem;
+    }
+
+    .sidebar a {
+      color: #fff;
+      display: block;
+      padding: 12px 20px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      border-left: 5px solid transparent;
+    }
+
+    .sidebar a:hover {
+      background-color: #2c2c2c;
+      color: #00ff99;
+      border-left: 5px solid #00ff99;
+    }
+
+    .sidebar a.active {
+      background-color: #121212;
+      color: #ff4444;
+      font-weight: bold;
+      border-left: 5px solid #ff4444;
+    }
+
+    .sidebar i {
+      width: 20px;
+    }
+
+    .mobile-controls {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      justify-content: center;
+      gap: 10px;
+      z-index: 1000;
+      background: transparent;
+    }
+
+    .mobile-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .mobile-btn:hover {
+      background: #0056b3;
+      transform: translateY(-1px);
+    }
+
+    .mobile-btn.active {
+      background: #28a745;
+    }
+
+    .mobile-btn span {
+      font-size: 16px;
+    }
+
+    .close-panel,
+    .close-sidebar {
+      display: none !important;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-controls {
+        display: flex !important;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 80%;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        overflow-y: auto;
+      }
+
+      .sidebar.show {
+        left: 0;
+      }
+
+      main {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+        padding: 0 !important;
+      }
+
+      .close-panel {
+        display: flex !important;
+      }
+
+      .close-sidebar {
+        display: flex !important;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        font-size: 16px;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001;
+      }
+
+      .sidebar.show .close-sidebar {
+        display: flex;
+      }
+
+      .mobile-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        display: none;
+      }
+
+      .mobile-overlay.show {
+        display: block;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-2 sidebar d-flex flex-column">
+        <h5 class="text-white text-center mb-4">Menú</h5>
+
+        <a href="/panel" class="<%= activePage === 'panel' ? 'active' : '' %>">
+          <i class="fas fa-house me-2"></i> Home
+        </a>
+
+
+
+        <a href="/signals" class="<%= activePage === 'signals' ? 'active' : '' %>">
+          <i class="fas fa-layer-group me-2"></i> Panel de Señales
+        </a>
+
+
+
+
+        <!-- Submenú desplegable para Catalogación -->
+        <a class="d-flex justify-content-between align-items-center <%= activePage?.startsWith('catalogacion_') ? 'active' : '' %>"
+          data-bs-toggle="collapse" href="#submenuCatalogacion" role="button" aria-expanded="false"
+          aria-controls="submenuCatalogacion">
+          <span><i class="fas fa-clipboard-list me-2"></i> Catalogador iqOtion</span>
+          <i class="fas fa-chevron-down"></i>
+        </a>
+        <div class="collapse <%= activePage?.startsWith('catalogacion_') ? 'show' : '' %>" id="submenuCatalogacion">
+          <ul class="list-unstyled ms-3">
+            <li><a href="/catalogacion/eurusd_otc" class="<%= activePage === 'eurusd_otc' ? 'active' : '' %>">EUR/USD
+                OTC</a></li>
+            <li><a href="/catalogacion/eurgbp_otc" class="<%= activePage === 'eurgbp_otc' ? 'active' : '' %>">EUR/GBP
+                OTC</a></li>
+            <li><a href="/catalogacion/usdchf_otc" class="<%= activePage === 'usdchf_otc' ? 'active' : '' %>">USD/CHF
+                OTC</a></li>
+            <li><a href="/catalogacion/audcad_otc" class="<%= activePage === 'audcad_otc' ? 'active' : '' %>">AUD/CAD
+                OTC</a></li>
+            <li><a href="/catalogacion/gbpusd_otc" class="<%= activePage === 'gbpusd_otc' ? 'active' : '' %>">GBP/USD
+                OTC</a></li>
+            <li><a href="/catalogacion/usdzar_otc" class="<%= activePage === 'usdzar_otc' ? 'active' : '' %>">USD/ZAR
+                OTC</a></li>
+            <li><a href="/catalogacion/usdxof_otc" class="<%= activePage === 'usdxof_otc' ? 'active' : '' %>">USD/XOF
+                OTC</a></li>
+            <li><a href="/catalogacion/usdsgd_otc" class="<%= activePage === 'usdsgd_otc' ? 'active' : '' %>">USD/SGD
+                OTC</a></li>
+            <li><a href="/catalogacion/usdhkd_otc" class="<%= activePage === 'usdhkd_otc' ? 'active' : '' %>">USD/HKD
+                OTC</a></li>
+            <li><a href="/catalogacion/usdinr_otc" class="<%= activePage === 'usdinr_otc' ? 'active' : '' %>">USD/INR
+                OTC</a></li>
+          </ul>
+        </div>
+
+        <a href="/manual" class="<%= activePage === 'manual' ? 'active' : '' %>">
+          <i class="fas fa-user-edit me-2"></i> Otro Broker (Cat. Manual)
+        </a>
+
+        <a href="/backtesting" class="<%= activePage === 'backtesting' ? 'active' : '' %>">
+          <i class="fas fa-history me-2"></i> Probador de Estrategias
+        </a>
+
+        <a href="/escaner" class="<%= activePage === 'escaner' ? 'active' : '' %>">
+          <i class="fas fa-search me-2"></i> Escáner de Patrones
+        </a>
+
+        <a href="/bots" class="<%= activePage === 'bots' ? 'active' : '' %>">
+          <i class="fas fa-robot me-1"></i></i> Bots Automáticos
+        </a>
+
+        <a href="/patrones" class="<%= activePage === 'patrones' ? 'active' : '' %>">
+          <i class="fas fa-book me-2"></i> Explicación Patrones
+        </a>
+
+        <a href="/suscripcion" class="<%= activePage === 'suscripcion' ? 'active' : '' %>">
+          <i id="menu-suscripcion-icon" class="fas fa-crown me-2" aria-hidden="true"></i>
+          <span id="menu-suscripcion-text">Plan Suscrito (—)</span>
+        </a>
+
+
+        <div class="mt-auto border-top border-secondary pt-3">
+          <a href="/logout" class="text-danger d-block">
+            <i class="fas fa-right-from-bracket me-2"></i> Cerrar sesión
+          </a>
+        </div>
+      </nav>
+
+      <main class="col-md-10 p-4">
+        <%- body %>
+      </main>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS (para collapse) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const userId = "<%= user.id %>";
+
+      try {
+        const { data, error } = await clientesupabase
+          .from("user_config")
+          .select("licencia")
+          .eq("user_id", userId)
+          .single();
+
+        if (error) throw error;
+
+        const licencia = data?.licencia || "free";
+
+
+        // Mapas por plan
+        const ICONO_POR_PLAN = {
+          demo: 'fa-eye',
+          free: 'fa-gift',
+          pro: 'fa-rocket',
+          premium: 'fa-crown',
+          elite: 'fa-crown'
+        };
+        const COLOR_POR_PLAN = {
+          demo: 'text-secondary',
+          free: 'text-success',
+          pro: 'text-primary',
+          premium: 'text-warning',
+          elite: 'text-warning'
+        };
+        const LABEL_POR_PLAN = {
+          demo: 'Demo',
+          free: 'Free',
+          pro: 'Pro',
+          premium: 'Premium',
+          elite: 'Elite'
+        };
+
+        const planKey = (licencia || 'free').toLowerCase();
+        const iconClass = ICONO_POR_PLAN[planKey] || ICONO_POR_PLAN.free;
+        const colorClass = COLOR_POR_PLAN[planKey] || COLOR_POR_PLAN.free;
+        const label = LABEL_POR_PLAN[planKey] || LABEL_POR_PLAN.free;
+
+        // Actualiza el icono
+        const menuIcon = document.getElementById('menu-suscripcion-icon');
+        if (menuIcon) {
+          menuIcon.classList.remove('fa-flask', 'fa-gift', 'fa-rocket', 'fa-crown',
+            'text-secondary', 'text-success', 'text-primary', 'text-warning');
+          menuIcon.classList.add('fas', iconClass, 'me-2', colorClass);
+          menuIcon.setAttribute('aria-label', `Plan ${label}`);
+          menuIcon.setAttribute('title', `Plan ${label}`);
+        }
+
+        // Actualiza el texto
+        const menuText = document.getElementById('menu-suscripcion-text');
+        if (menuText) {
+          menuText.textContent = `Plan Suscrito (${label})`;
+        }
+
+        // Rutas presentes en tu menú lateral:
+        // /signals, /backtesting, /manual, /escaner  (todas existen en tu layout) 
+        const restricciones = {
+          free: [
+            'a[href="/catalogacion/eurgbp_otc"]',
+            'a[href="/catalogacion/usdchf_otc"]',
+            'a[href="/catalogacion/audcad_otc"]',
+            'a[href="/catalogacion/gbpusd_otc"]',
+            'a[href="/catalogacion/usdzar_otc"]',
+            'a[href="/catalogacion/usdxof_otc"]',
+            'a[href="/catalogacion/usdsgd_otc"]',
+            'a[href="/catalogacion/usdhkd_otc"]',
+            'a[href="/catalogacion/usdinr_otc"]',
+            'a[href="/backtesting"]',
+            'a[href="/manual"]',
+            'a[href="/bots"]',
+            'a[href="/escaner"]',
+          ],
+          pro: ['a[href="/bots"]',],
+          demo: ['a[href="/bots"]',],
+          premium: ['a[href="/bots"]',],
+          elite: []
+        };
+
+        const bloqueados = restricciones[licencia] || [];
+
+        // 1) Marcar bloqueados, agregar tooltip y **NO** usar pointer-events:none
+        bloqueados.forEach(selector => {
+          const el = document.querySelector(selector);
+          if (!el) return;
+
+          el.classList.add("disabled-link");
+          el.style.opacity = "0.6";
+          el.setAttribute("aria-disabled", "true");
+          el.setAttribute("tabindex", "0"); // permite focus para tooltip con teclado
+
+          // Tooltip
+          el.setAttribute("data-bs-toggle", "tooltip");
+          el.setAttribute("data-bs-placement", "right");
+          el.setAttribute("title", "🔒 Su membresía no incluye esta función, suscriba a un plan Superior");
+
+          // 2) Evitar navegación pero permitir hover/click para mostrar tooltip
+          el.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Mostrar tooltip manualmente en tap/click (útil en móvil)
+            const tip = bootstrap.Tooltip.getOrCreateInstance(el, {
+              container: "body",
+              placement: "right",
+              trigger: "manual"
+            });
+            tip.show();
+            setTimeout(() => tip.hide(), 1500);
+          }, true);
+        });
+
+        // 3) Inicializar tooltips para hover/focus (desktop/teclado)
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+          bootstrap.Tooltip.getOrCreateInstance(el, {
+            container: "body",
+            placement: "right",
+            trigger: "hover focus"
+          });
+        });
+
+      } catch (err) {
+        console.error("Error obteniendo licencia del usuario:", err);
+      }
+    });
+  </script>
+
+  <style>
+    .disabled-link {
+      cursor: not-allowed !important;
+    }
+  </style>
+
+
+
+
+
+</body>
+
+</html>

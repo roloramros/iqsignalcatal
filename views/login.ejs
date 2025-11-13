@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Viewport esencial para mobile -->
+  <style>
+    /* Estilos personalizados para mejorar el responsive */
+    body {
+      padding: 20px;
+      /* Espacio en móviles */
+      background-color: #cecece;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('/login.jpg');
+      /* Cambia por tu imagen */
+      background-size:auto;
+      background-position: center;
+      z-index: -1;
+      /* Poner detrás del contenido */
+    }
+
+    .card {
+      width: 100%;
+      max-width: 350px;
+      /* Máximo ancho en desktop */
+      transition: all 0.3s ease;
+      /* Transición suave */
+    }
+
+    /* Ajustes específicos para pantallas pequeñas */
+    @media (max-width: 576px) {
+      body {
+        padding: 10px;
+        align-items: flex-start;
+        /* Alinear arriba en móviles */
+      }
+
+      .card {
+        min-width: unset;
+        width: 100%;
+        padding: 20px 15px;
+        /* Menos padding en móviles */
+      }
+
+      h3 {
+        font-size: 1.5rem;
+        /* Tamaño de fuente más pequeño */
+      }
+    }
+
+    /* Ajustes para pantallas muy pequeñas */
+    @media (max-width: 400px) {
+      .card {
+        box-shadow: none;
+        /* Quitar sombra para más espacio */
+        border: none;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-light d-flex justify-content-center align-items-center vh-100 fondo-login">
+
+  <div class="card shadow p-4" style="min-width: 350px;">
+    <h3 class="mb-3 text-center">Iniciar Sesión</h3>
+
+    <% if (error) { %>
+      <div class="alert alert-danger" role="alert">
+        <%= error %>
+      </div>
+      <% } %>
+
+        <form action="/login" method="post">
+          <div class="mb-3">
+            <input type="email" name="email" class="form-control" placeholder="Correo electrónico" required>
+          </div>
+          <div class="mb-3">
+            <input type="password" name="password" class="form-control" placeholder="Contraseña" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Entrar</button>
+        </form>
+
+        <div class="text-center mt-3">
+          <a href="/register">¿No tienes cuenta? Regístrate</a>
+        </div>
+  </div>
+
+</body>
+
+</html>
