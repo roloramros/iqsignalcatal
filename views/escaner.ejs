@@ -1510,11 +1510,7 @@
 
     function buscarPatronEnUltimasVelas(patronConfirmacion, velasMostrar) {
       // Mapear colores a letras
-      const mapColor = {
-        green: "G",
-        red: "R",
-        gray: "E"
-      };
+      const mapColor = { green: "G", red: "R", doji: "D", gray: "D" };
       // Convertir velasMostrar a una cadena de letras
       const secuenciaVelas = velasMostrar.map(v => mapColor[v.candle_color] || "").join("");
       patronesEncontrados = [];
